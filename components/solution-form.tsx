@@ -5,9 +5,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect } from "react";
 import { solutionFormSchema, type SolutionFormValues, languageOptions, categoryOptions, subcategoryOptions } from "@/lib/validations";
 import { CodeEditor } from "./code-editor";
+import { ProblemPreview } from "./problem-preview";
+import { ManualEntryForm } from "./manual-entry-form";
 
 export function SolutionForm() {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [problemData, setProblemData] = useState<any>(null);
+  const [fetchLoading, setFetchLoading] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [showManualEntry, setShowManualEntry] = useState(false);
   
   const form = useForm<SolutionFormValues>({
     resolver: zodResolver(solutionFormSchema) as any,
@@ -38,6 +44,64 @@ export function SolutionForm() {
   const category = watch("category");
   const solutionCode = watch("solutionCode");
   const useAI = watch("useAI");
+  const problemNumber = watch("problemNumber");
+
+  // Fetch problem details from LeetCode
+  const fetchProblemDetails = async () => {
+    if (!problemNumber || !/^\d+$/.test(problemNumber)) {
+      setFetchError("Please enter a valid problem number");
+      return;
+    }
+
+    setFetchLoading(true);
+    setFetchError(null);
+    setProblemData(null);
+    setShowManualEntry(false);
+
+    try {
+      const response = await fetch(`/api/leetcode/fetch-problem?number=${problemNumber}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to fetch problem");
+      }
+
+      setProblemData(data);
+      
+      // Auto-fill difficulty if available
+      if (data.difficulty) {
+        setValue("difficulty", data.difficulty as "Easy" | "Medium" | "Hard");
+      }
+
+      setFetchError(null);
+    } catch (error) {
+      setFetchError(error instanceof Error ? error.message : "Failed to fetch problem");
+      setProblemData(null);
+    } finally {
+      setFetchLoading(false);
+    }
+  };
+
+  // Handle manual entry save
+  const handleManualEntrySave = (data: any) => {
+    // Create a problem data object from manual entry
+    const manualProblemData = {
+      questionFrontendId: problemNumber,
+      title: data.title,
+      titleSlug: data.title.toLowerCase().replace(/\s+/g, "-"),
+      difficulty: "Medium", // Will be set by form
+      content: data.description,
+      topicTags: [],
+      problemUrl: `https://leetcode.com/problems/${data.title.toLowerCase().replace(/\s+/g, "-")}/`,
+      examples: data.examples,
+      constraints: data.constraints,
+      isManual: true,
+    };
+    
+    setProblemData(manualProblemData);
+    setShowManualEntry(false);
+    setFetchError(null);
+  };
 
   // Update subcategory options when category changes
   useEffect(() => {
@@ -121,6 +185,47 @@ export function SolutionForm() {
           )}
         </div>
       </div>
+
+      {/* Fetch Problem Button */}
+      <div className="space-y-3">
+        <button
+          type="button"
+          onClick={fetchProblemDetails}
+          disabled={!problemNumber || fetchLoading}
+          className="w-full px-4 py-3 rounded-lg border-2 border-zinc-200 dark:border-zinc-800 text-black dark:text-white font-medium hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        >
+          {fetchLoading ? (
+            <>
+              <div className="w-4 h-4 border-2 border-black dark:border-white border-t-transparent dark:border-t-transparent rounded-full animate-spin" />
+              Fetching Problem Details...
+            </>
+          ) : (
+            <>
+              <span className="text-lg">🔍</span>
+              Fetch Problem Details from LeetCode
+            </>
+          )}
+        </button>
+
+        {/* Manual Entry Toggle - Show when there's an error or user wants manual entry */}
+        {(fetchError || showManualEntry) && (
+          <button
+            type="button"
+            onClick={() => setShowManualEntry(!showManualEntry)}
+            className="w-full px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 text-black dark:text-white text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+          >
+            {showManualEntry ? "Hide Manual Entry" : "📝 Enter Problem Details Manually"}
+          </button>
+        )}
+      </div>
+
+      {/* Manual Entry Form */}
+      {showManualEntry && <ManualEntryForm onSave={handleManualEntrySave} />}
+
+      {/* Problem Preview */}
+      {!showManualEntry && (
+        <ProblemPreview problem={problemData} loading={fetchLoading} error={fetchError} />
+      )}
 
       {/* Solution Code */}
       <div>
