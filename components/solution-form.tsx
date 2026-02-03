@@ -121,6 +121,33 @@ export function SolutionForm() {
     setFetchError(null);
   };
 
+  // Generate AI prompt template for manual copy-paste
+  const generateAIPrompt = () => {
+    const problemTitle = problemData?.title || "[Problem Title]";
+    const problemDescription = problemData?.content || "[Problem Description]";
+    const code = solutionCode || "[Your Solution Code]";
+    const lang = language || "typescript";
+
+    return `Analyze this LeetCode solution and generate a concise explanation in Markdown format.
+
+**Problem:** ${problemTitle}
+
+**Problem Description:**
+${problemDescription.substring(0, 300)}${problemDescription.length > 300 ? "..." : ""}
+
+**My Solution Code (${lang}):**
+\`\`\`${lang}
+${code.substring(0, 500)}${code.length > 500 ? "\n... (truncated)" : ""}
+\`\`\`
+
+**Please provide:**
+1. **Approach**: Brief explanation of the solution strategy (2-3 sentences)
+2. **Time Complexity**: Big-O notation with explanation
+3. **Space Complexity**: Big-O notation with explanation
+
+Format your response in Markdown with clear sections.`;
+  };
+
   // Update subcategory options when category changes
   useEffect(() => {
     if (category !== selectedCategory) {
@@ -328,35 +355,74 @@ export function SolutionForm() {
         )}
       </div>
 
-      {/* AI Toggle */}
-      <div className="flex items-center gap-3">
-        <input
-          {...register("useAI")}
-          type="checkbox"
-          id="useAI"
-          className="w-4 h-4 border-zinc-300 dark:border-zinc-700 rounded"
-        />
-        <label htmlFor="useAI" className="text-sm text-black dark:text-white">
-          Use AI to generate approach explanation
-        </label>
-      </div>
 
-      {/* Manual Approach (if AI is disabled) */}
-      {!useAI && (
+      {/* Solution Approach Section */}
+      <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 space-y-4">
+        <h3 className="text-sm font-semibold text-black dark:text-white">
+          💡 Solution Approach
+        </h3>
+
+        {/* AI Prompt Template - Collapsible */}
+        <details className="group">
+          <summary className="cursor-pointer text-sm text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white flex items-center gap-2">
+            <span className="text-lg">🤖</span>
+            <span>Show AI Prompt Template (Copy to ChatGPT/Claude/Gemini)</span>
+          </summary>
+          
+          <div className="mt-3 p-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                Copy this prompt and paste it into your preferred AI tool
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  const prompt = generateAIPrompt();
+                  navigator.clipboard.writeText(prompt);
+                  alert("Prompt copied to clipboard!");
+                }}
+                className="px-3 py-1 text-xs rounded bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
+              >
+                📋 Copy
+              </button>
+            </div>
+            <pre className="text-xs text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap font-mono overflow-x-auto">
+{generateAIPrompt()}
+            </pre>
+          </div>
+        </details>
+
+        {/* Manual Approach Input */}
         <div>
           <label htmlFor="manualApproach" className="block text-sm font-medium text-black dark:text-white mb-2">
-            Manual Approach Explanation
+            Your Solution Approach
           </label>
           <textarea
             {...register("manualApproach")}
             id="manualApproach"
-            rows={6}
-            placeholder="Describe your approach in detail..."
-            className="w-full px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black text-black dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
-          />
-        </div>
-      )}
+            rows={8}
+            placeholder="Explain your solution approach here... (Markdown supported)
 
+Example:
+## Approach
+1. Use a hash map to store complements
+2. Iterate through the array once
+
+## Time Complexity
+O(n) - single pass through array
+
+## Space Complexity
+O(n) - hash map storage"
+            className="w-full px-4 py-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black text-black dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white font-mono text-sm"
+          />
+          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            Tip: Use Markdown formatting. This will be displayed in your README.
+          </p>
+          {errors.manualApproach && (
+            <p className="mt-1 text-sm text-red-500">{errors.manualApproach.message}</p>
+          )}
+        </div>
+      </div>
       {/* Complexity Analysis */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
