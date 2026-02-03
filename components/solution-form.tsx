@@ -6,17 +6,35 @@ import { useState, useEffect } from "react";
 import { solutionFormSchema, type SolutionFormValues, languageOptions, categoryOptions, subcategoryOptions } from "@/lib/validations";
 import { CodeEditor } from "./code-editor";
 import { ProblemPreview } from "./problem-preview";
-import { ManualEntryForm } from "./manual-entry-form";
+import { ManualEntryForm, type ManualProblemData } from "./manual-entry-form";
+import type { Resolver } from "react-hook-form";
+
+interface LeetCodeProblem {
+  questionFrontendId: string;
+  title: string;
+  titleSlug: string;
+  difficulty: string;
+  content: string;
+  topicTags: string[];
+  problemUrl: string;
+  examples?: Array<{
+    input: string;
+    output: string;
+    explanation?: string;
+  }>;
+  constraints?: string;
+  isManual?: boolean;
+}
 
 export function SolutionForm() {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [problemData, setProblemData] = useState<any>(null);
+  const [problemData, setProblemData] = useState<LeetCodeProblem | null>(null);
   const [fetchLoading, setFetchLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [showManualEntry, setShowManualEntry] = useState(false);
   
   const form = useForm<SolutionFormValues>({
-    resolver: zodResolver(solutionFormSchema) as any,
+    resolver: zodResolver(solutionFormSchema) as Resolver<SolutionFormValues>,
     defaultValues: {
       problemNumber: "",
       language: "typescript",
@@ -83,7 +101,7 @@ export function SolutionForm() {
   };
 
   // Handle manual entry save
-  const handleManualEntrySave = (data: any) => {
+  const handleManualEntrySave = (data: ManualProblemData) => {
     // Create a problem data object from manual entry
     const manualProblemData = {
       questionFrontendId: problemNumber,

@@ -55,14 +55,14 @@ export function ProblemPreview({ problem, loading, error }: ProblemPreviewProps)
     return (
       <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
         <p className="text-zinc-500 dark:text-zinc-400 text-center">
-          Enter a problem number and click "Fetch Problem Details" to preview
+          Enter a problem number and click &quot;Fetch Problem Details&quot; to preview
         </p>
       </div>
     );
   }
 
   // Handle manual entry data differently
-  const isManual = (problem as any).isManual;
+  const isManual = problem.isManual === true;
   const examples = isManual ? (problem.examples || []) : parseExamples(problem.content);
   const constraints = isManual ? (problem.constraints || "") : parseConstraints(problem.content);
   const statement = isManual ? problem.content : extractProblemStatement(problem.content);

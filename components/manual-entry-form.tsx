@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Trash2, Plus } from "lucide-react";
 
-interface ManualProblemData {
+export interface ManualProblemData {
   title: string;
   description: string;
   examples: {

@@ -55,7 +55,7 @@ interface LeetCodeProblemResponse {
       sampleTestCase?: string;
     };
   };
-  errors?: any[];
+  errors?: { message: string; extensions?: Record<string, unknown> }[];
 }
 
 interface ProblemListResponse {
@@ -70,7 +70,7 @@ interface ProblemListResponse {
       }[];
     };
   };
-  errors?: any[];
+  errors?: { message: string; extensions?: Record<string, unknown> }[];
 }
 
 async function fetchWithRetry(

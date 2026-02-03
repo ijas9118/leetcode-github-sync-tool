@@ -17,7 +17,6 @@ export function parseExamples(content: string): Array<{
   
   let match;
   while ((match = exampleRegex.exec(content)) !== null) {
-    const exampleNum = match[1];
     const preContent = match[2];
     
     // Extract Input - can be <strong>Input:</strong> s = "..." or plain text
