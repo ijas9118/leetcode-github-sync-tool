@@ -57,14 +57,13 @@ export function SolutionForm() {
     handleSubmit,
     watch,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset,
   } = form;
 
   const language = watch("language");
   const category = watch("category");
   const solutionCode = watch("solutionCode");
-  const useAI = watch("useAI");
   const problemNumber = watch("problemNumber");
 
   // Fetch problem details from LeetCode

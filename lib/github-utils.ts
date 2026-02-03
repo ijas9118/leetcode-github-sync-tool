@@ -96,8 +96,6 @@ export function generateReadmeContent(
     Hard: "🔴 Hard",
   }[problemData.difficulty] || problemData.difficulty;
 
-  const ext = getFileExtension(solutionData.language);
-
   return `# ${problemData.questionFrontendId}. ${problemData.title}
 
 **Difficulty**: ${difficultyBadge}  
