@@ -32,6 +32,9 @@ export function SolutionForm() {
   const [fetchLoading, setFetchLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [showManualEntry, setShowManualEntry] = useState(false);
+  const [pushing, setPushing] = useState(false);
+  const [pushResult, setPushResult] = useState<{ success: boolean; message: string; urls?: { readme?: string; solution?: string } } | null>(null);
+  const [githubConfig, setGithubConfig] = useState<{ hasToken: boolean; owner: string; repo: string; branch: string } | null>(null);
   
   const form = useForm<SolutionFormValues>({
     resolver: zodResolver(solutionFormSchema) as Resolver<SolutionFormValues>,
@@ -180,14 +183,102 @@ Format your response in Markdown with clear sections.`;
     }
   }, [setValue]);
 
+  // Load GitHub configuration from environment
+  useEffect(() => {
+    const fetchGithubConfig = async () => {
+      try {
+        const response = await fetch("/api/github/config");
+        const data = await response.json();
+        setGithubConfig(data);
+      } catch (error) {
+        console.error("Failed to load GitHub config:", error);
+      }
+    };
+    fetchGithubConfig();
+  }, []);
+
+  //  Push to GitHub
+  const pushToGitHub = async () => {
+    if (!problemData) {
+      setPushResult({ success: false, message: "Please fetch a problem first" });
+      return;
+    }
+
+    const values = watch();
+    if (!values.solutionCode) {
+      setPushResult({ success: false, message: "Please enter solution code" });
+      return;
+    }
+
+    if (!values.manualApproach) {
+      setPushResult({ success: false, message: "Please enter solution approach" });
+      return;
+    }
+
+    setPushing(true);
+    setPushResult(null);
+
+    try {
+      const response = await fetch("/api/github/push", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          problemData: {
+            questionFrontendId: problemData.questionFrontendId,
+            title: problemData.title,
+            difficulty: values.difficulty,
+            content: problemData.content,
+            topicTags: problemData.topicTags,
+            problemUrl: problemData.problemUrl,
+          },
+          solutionData: {
+            code: values.solutionCode,
+            language: values.language,
+            category: values.category,
+            subcategory: values.subcategory,
+            approach: values.manualApproach,
+            timeComplexity: values.timeComplexity,
+            spaceComplexity: values.spaceComplexity,
+          },
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setPushResult({
+          success: true,
+          message: data.message || "Successfully pushed to GitHub!",
+          urls: {
+            readme: data.readmeUrl,
+            solution: data.solutionUrl,
+          },
+        });
+      } else {
+        setPushResult({
+          success: false,
+          message: data.error || "Failed to push to GitHub",
+        });
+      }
+    } catch (error) {
+      setPushResult({
+        success: false,
+        message: error instanceof Error ? error.message : "Failed to push to GitHub",
+      });
+    } finally {
+      setPushing(false);
+    }
+  };
+
   const onSubmit = async (data: SolutionFormValues) => {
     console.log("Form submitted:", data);
-    // TODO: Implement submission logic in Phase 3+
+    // Form submission now happens via the Push to GitHub button
   };
 
   const handleReset = () => {
     reset();
     localStorage.removeItem("leetcode-form-draft");
+    setPushResult(null);
   };
 
   return (
@@ -452,21 +543,90 @@ O(n) - hash map storage"
         </div>
       </div>
 
+      {/* GitHub Push Section */}
+      <div className="border-t border-zinc-200 dark:border-zinc-800 pt-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-black dark:text-white">
+            📤 Push to GitHub
+          </h3>
+          {githubConfig && (
+            <div className="text-xs text-zinc-600 dark:text-zinc-400">
+              {githubConfig.hasToken ? (
+                <span className="text-green-600 dark:text-green-400">
+                  ✓ Configured: {githubConfig.owner}/{githubConfig.repo}
+                </span>
+              ) : (
+                <span className="text-red-600 dark:text-red-400">
+                  ✗ Configure GITHUB_TOKEN in .env.local
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Push Result */}
+        {pushResult && (
+          <div
+            className={`p-4 rounded-lg border ${
+              pushResult.success
+                ? "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800"
+                : "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800"
+            }`}
+          >
+            <p
+              className={`text-sm font-medium ${
+                pushResult.success
+                  ? "text-green-900 dark:text-green-200"
+                  : "text-red-900 dark:text-red-200"
+              }`}
+            >
+              {pushResult.message}
+            </p>
+            {pushResult.success && pushResult.urls && (
+              <div className="mt-2 space-y-1">
+                {pushResult.urls.readme && (
+                  <a
+                    href={pushResult.urls.readme}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-green-700 dark:text-green-300 hover:underline block"
+                  >
+                    📄 View README on GitHub →
+                  </a>
+                )}
+                {pushResult.urls.solution && (
+                  <a
+                    href={pushResult.urls.solution}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-green-700 dark:text-green-300 hover:underline block"
+                  >
+                    💻 View Solution on GitHub →
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={pushToGitHub}
+          disabled={pushing || !problemData || !githubConfig?.hasToken}
+          className="w-full px-6 py-3 rounded-lg bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {pushing ? "Pushing..." : "📤 Push to GitHub"}
+        </button>
+      </div>
+
       {/* Form Actions */}
       <div className="flex gap-4">
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="px-6 py-3 rounded-lg bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isSubmitting ? "Processing..." : "Continue"}
-        </button>
         <button
           type="button"
           onClick={handleReset}
           className="px-6 py-3 rounded-lg border border-zinc-200 dark:border-zinc-800 text-black dark:text-white font-medium hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
         >
-          Reset
+          Reset Form
         </button>
       </div>
     </form>
