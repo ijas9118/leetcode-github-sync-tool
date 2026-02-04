@@ -11,60 +11,66 @@ export function parseExamples(content: string): Array<{
     explanation?: string;
   }> = [];
 
-  // Match example blocks - they can be in <p> tags with <strong class="example"> or just <strong>
-  // Pattern: <strong class="example">Example 1:</strong> ... content in <pre> tags or directly
-  const exampleRegex =
-    /<p><strong class="example">Example\s+(\d+):<\/strong><\/p>\s*<pre>([\s\S]*?)<\/pre>/gi;
+  // Find all "Example X:" headers
+  // This matches:
+  // <p><strong>Example 1:</strong></p>
+  // <strong class="example">Example 1:</strong>
+  // <strong>Example 1:</strong>
+  const exampleHeaderRegex =
+    /<[^>]*strong[^>]*>Example\s+(\d+):<\/[^>]*strong>(?:<\/[^>]*p>)?/gi;
 
+  // Find all matches to get their positions
+  const matches = [];
   let match;
-  while ((match = exampleRegex.exec(content)) !== null) {
-    const preContent = match[2];
+  while ((match = exampleHeaderRegex.exec(content)) !== null) {
+    matches.push({
+      index: match.index,
+      endIndex: match.index + match[0].length,
+      fullMatch: match[0],
+    });
+  }
 
-    // Extract Input - can be <strong>Input:</strong> s = "..." or plain text
-    const inputMatch = preContent.match(
-      /<strong>Input:<\/strong>\s*(.+?)(?=\n<strong>|$)/i
-    );
-    let input = inputMatch ? stripHtml(inputMatch[1]).trim() : "";
+  // Process each example section
+  for (let i = 0; i < matches.length; i++) {
+    const start = matches[i].endIndex;
+    // End is either start of next example, Constraints section, or end of content
+    let end = content.length;
 
-    // If no match, try without strong tags
-    if (!input) {
-      const plainInputMatch = preContent.match(
-        /Input:\s*(.+?)(?=\nOutput:|$)/i
+    // Check for next example
+    if (i + 1 < matches.length) {
+      end = matches[i + 1].index;
+    } else {
+      // Check for Constraints section
+      const constraintsMatch = content.match(
+        /<[^>]*strong[^>]*>Constraints:<\/[^>]*strong>/i
       );
-      input = plainInputMatch ? plainInputMatch[1].trim() : "";
+      if (constraintsMatch && constraintsMatch.index! > start) {
+        end = constraintsMatch.index!;
+      }
     }
+
+    const exampleContent = content.substring(start, end);
+
+    // Extract Input
+    // Matches: <strong>Input:</strong> ... or Input: ...
+    const inputMatch = exampleContent.match(
+      /(?:<strong>)?Input:(?:<\/strong>)?\s*([\s\S]+?)(?=(?:<[^>]+>)?Output:|$)/i
+    );
+    const input = inputMatch ? stripHtml(inputMatch[1]).trim() : "";
 
     // Extract Output
-    const outputMatch = preContent.match(
-      /<strong>Output:<\/strong>\s*(.+?)(?=\n<strong>|$)/i
+    const outputMatch = exampleContent.match(
+      /(?:<strong>)?Output:(?:<\/strong>)?\s*([\s\S]+?)(?=(?:<[^>]+>)?Explanation:|$)/i
     );
-    let output = outputMatch ? stripHtml(outputMatch[1]).trim() : "";
+    const output = outputMatch ? stripHtml(outputMatch[1]).trim() : "";
 
-    // If no match, try without strong tags
-    if (!output) {
-      const plainOutputMatch = preContent.match(
-        /Output:\s*(.+?)(?=\nExplanation:|$)/i
-      );
-      output = plainOutputMatch ? plainOutputMatch[1].trim() : "";
-    }
-
-    // Extract Explanation (optional)
-    const explanationMatch = preContent.match(
-      /<strong>Explanation:<\/strong>\s*([\s\S]+?)(?=\n<strong>|$)/i
+    // Extract Explanation
+    const explanationMatch = exampleContent.match(
+      /(?:<strong>)?Explanation:(?:<\/strong>)?\s*([\s\S]+?)$/i
     );
-    let explanation = explanationMatch
+    const explanation = explanationMatch
       ? stripHtml(explanationMatch[1]).trim()
       : undefined;
-
-    // If no match, try without strong tags
-    if (!explanation) {
-      const plainExplanationMatch = preContent.match(
-        /Explanation:\s*([\s\S]+?)$/i
-      );
-      explanation = plainExplanationMatch
-        ? plainExplanationMatch[1].trim()
-        : undefined;
-    }
 
     if (input && output) {
       examples.push({ input, output, explanation });

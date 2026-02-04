@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { stripHtml } from "@/lib/leetcode/parser";
+
 const LEETCODE_GRAPHQL_ENDPOINT = "https://leetcode.com/graphql";
 
 const PROBLEM_QUERY = `
@@ -197,7 +199,7 @@ export async function GET(request: NextRequest) {
       content: questionData.content,
       topicTags: questionData.topicTags.map((tag) => tag.name),
       exampleTestcases: questionData.exampleTestcases,
-      hints: questionData.hints || [],
+      hints: (questionData.hints || []).map((hint) => stripHtml(hint)),
       sampleTestCase: questionData.sampleTestCase,
       problemUrl: `https://leetcode.com/problems/${questionData.titleSlug}/`,
     };

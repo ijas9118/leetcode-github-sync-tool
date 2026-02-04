@@ -87,7 +87,6 @@ export function ProblemPreview({
     ? problem.content
     : extractProblemStatement(problem.content);
 
-
   const difficultyColor =
     {
       Easy: "text-green-600 dark:text-green-400",
