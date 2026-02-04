@@ -1,4 +1,4 @@
-import { SolutionForm } from "@/components/solution-form";
+import { SolutionForm } from "@/components/forms/solution-form";
 
 export default function Home() {
   return (

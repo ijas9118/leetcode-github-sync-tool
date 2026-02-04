@@ -4,7 +4,7 @@ import {
   extractProblemStatement,
   parseConstraints,
   parseExamples,
-} from "@/lib/leetcode-parser";
+} from "@/lib/leetcode/parser";
 
 interface LeetCodeProblem {
   questionFrontendId: string;

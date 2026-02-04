@@ -8,23 +8,23 @@ import { useForm } from "react-hook-form";
 
 import { generatePreviewReadme } from "@/lib/github-utils";
 import {
-  validateSolutionForm,
-  type ValidationResult,
-} from "@/lib/validation-utils";
-import {
   categoryOptions,
   languageOptions,
   solutionFormSchema,
   type SolutionFormValues,
   subcategoryOptions,
-} from "@/lib/validations";
+} from "@/lib/validations/schemas";
+import {
+  validateSolutionForm,
+  type ValidationResult,
+} from "@/lib/validations/utils";
 
+import { FolderTreePreview } from "../preview/folder-tree-preview";
+import { MarkdownPreview } from "../preview/markdown-preview";
+import { ProblemPreview } from "../preview/problem-preview";
+import { ValidationChecklist } from "../preview/validation-checklist";
 import { CodeEditor } from "./code-editor";
-import { FolderTreePreview } from "./folder-tree-preview";
 import { ManualEntryForm, type ManualProblemData } from "./manual-entry-form";
-import { MarkdownPreview } from "./markdown-preview";
-import { ProblemPreview } from "./problem-preview";
-import { ValidationChecklist } from "./validation-checklist";
 
 interface LeetCodeProblem {
   questionFrontendId: string;

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ValidationResult } from "@/lib/validation-utils";
+import type { ValidationResult } from "@/lib/validations/utils";
 
 interface ValidationChecklistProps {
   validationResult: ValidationResult;

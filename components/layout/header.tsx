@@ -2,7 +2,7 @@
 
 import { Code2, Github } from "lucide-react";
 
-import { ThemeToggle } from "./theme-toggle";
+import { ThemeToggle } from "../theme-toggle";
 
 export function Header() {
   return (
