@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { env } from "@/lib/env";
 import {
   type GitHubConfig,
   type ProblemData,
@@ -12,33 +13,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { problemData, solutionData } = body;
 
-    // Get GitHub config from environment variables
-    const token = process.env.GITHUB_TOKEN;
-    const owner = process.env.GITHUB_OWNER;
-    const repo = process.env.GITHUB_REPO;
-    const branch = process.env.GITHUB_BRANCH || "main";
-
-    // Validate environment configuration
-    if (!token) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "GITHUB_TOKEN not configured in environment variables",
-        },
-        { status: 500 }
-      );
-    }
-
-    if (!owner || !repo) {
-      return NextResponse.json(
-        {
-          success: false,
-          error:
-            "GITHUB_OWNER and GITHUB_REPO must be configured in environment variables",
-        },
-        { status: 500 }
-      );
-    }
+    const config: GitHubConfig = {
+      token: env.GITHUB_TOKEN,
+      owner: env.GITHUB_OWNER,
+      repo: env.GITHUB_REPO,
+      branch: env.GITHUB_BRANCH,
+    };
 
     // Validate request data
     if (!problemData || !solutionData) {
@@ -60,13 +40,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    const config: GitHubConfig = {
-      token,
-      owner,
-      repo,
-      branch,
-    };
 
     // Push to GitHub
     const result = await pushToGitHub(

@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 
+import { env } from "@/lib/env";
+
 export async function GET() {
   try {
     const config = {
-      hasToken: !!process.env.GITHUB_TOKEN,
-      owner: process.env.GITHUB_OWNER || "",
-      repo: process.env.GITHUB_REPO || "",
-      branch: process.env.GITHUB_BRANCH || "main",
+      hasToken: !!env.GITHUB_TOKEN,
+      owner: env.GITHUB_OWNER,
+      repo: env.GITHUB_REPO,
+      branch: env.GITHUB_BRANCH,
     };
 
     return NextResponse.json(config);
