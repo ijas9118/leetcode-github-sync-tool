@@ -1,42 +1,41 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
-import { validateGitHubToken } from "@/lib/github-utils";
+import { ErrorCode } from "@/lib/api/errors";
+import { errorResponse, successResponse } from "@/lib/api/response";
+import { validateGitHubToken } from "@/lib/github/auth";
 
 export async function POST(request: NextRequest) {
   try {
     const { token } = await request.json();
 
     if (!token) {
-      return NextResponse.json(
-        { valid: false, error: "Token is required" },
-        { status: 400 }
+      return errorResponse(
+        "Token is required",
+        400,
+        ErrorCode.VALIDATION_ERROR
       );
     }
 
     const result = await validateGitHubToken(token);
 
     if (result.valid) {
-      return NextResponse.json({
+      return successResponse({
         valid: true,
         user: result.user,
       });
     } else {
-      return NextResponse.json(
-        {
-          valid: false,
-          error: result.error || "Invalid token",
-        },
-        { status: 401 }
+      return errorResponse(
+        result.error || "Invalid token",
+        401,
+        ErrorCode.UNAUTHORIZED
       );
     }
   } catch (error) {
     console.error("GitHub validation error:", error);
-    return NextResponse.json(
-      {
-        valid: false,
-        error: error instanceof Error ? error.message : "Validation failed",
-      },
-      { status: 500 }
+    return errorResponse(
+      error instanceof Error ? error.message : "Validation failed",
+      500,
+      ErrorCode.INTERNAL_ERROR
     );
   }
 }

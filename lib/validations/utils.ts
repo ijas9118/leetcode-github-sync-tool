@@ -80,16 +80,17 @@ export function validateSolutionForm(
       id: "time-complexity",
       label: "Time complexity provided",
       passed:
-        !!formData.timeComplexity && formData.timeComplexity.trim().length > 0,
-      errorMessage: "Please specify time complexity (e.g., O(n))",
+        !!formData.timeComplexity &&
+        /^O\(.+\)$/.test(formData.timeComplexity.trim()),
+      errorMessage: "Must be in Big O notation, e.g., O(n)",
     },
     {
       id: "space-complexity",
       label: "Space complexity provided",
       passed:
         !!formData.spaceComplexity &&
-        formData.spaceComplexity.trim().length > 0,
-      errorMessage: "Please specify space complexity (e.g., O(1))",
+        /^O\(.+\)$/.test(formData.spaceComplexity.trim()),
+      errorMessage: "Must be in Big O notation, e.g., O(1)",
     },
     {
       id: "github-config",

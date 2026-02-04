@@ -117,15 +117,19 @@ export function SolutionForm() {
       );
       const data = await response.json();
 
-      if (!response.ok) {
+      if (!response.ok || !data.success) {
         throw new Error(data.error || "Failed to fetch problem");
       }
 
-      setProblemData(data);
+      const problem = data.data;
+      setProblemData(problem);
 
       // Auto-fill difficulty if available
-      if (data.difficulty) {
-        setValue("difficulty", data.difficulty as "Easy" | "Medium" | "Hard");
+      if (problem.difficulty) {
+        setValue(
+          "difficulty",
+          problem.difficulty as "Easy" | "Medium" | "Hard"
+        );
       }
 
       setFetchError(null);
@@ -225,7 +229,9 @@ Format your response in Markdown with clear sections.`;
       try {
         const response = await fetch("/api/github/config");
         const data = await response.json();
-        setGithubConfig(data);
+        if (data.success && data.data) {
+          setGithubConfig(data.data);
+        }
       } catch (error) {
         console.error("Failed to load GitHub config:", error);
       }
@@ -284,6 +290,16 @@ Format your response in Markdown with clear sections.`;
       return;
     }
 
+    // Trigger full form validation
+    const isValid = await form.trigger();
+    if (!isValid) {
+      setPushResult({
+        success: false,
+        message: "Please fix validation errors before pushing",
+      });
+      return;
+    }
+
     const values = watch();
     if (!values.solutionCode) {
       setPushResult({ success: false, message: "Please enter solution code" });
@@ -328,13 +344,13 @@ Format your response in Markdown with clear sections.`;
 
       const data = await response.json();
 
-      if (data.success) {
+      if (data.success && data.data) {
         setPushResult({
           success: true,
           message: data.message || "Successfully pushed to GitHub!",
           urls: {
-            readme: data.readmeUrl,
-            solution: data.solutionUrl,
+            readme: data.data.readmeUrl,
+            solution: data.data.solutionUrl,
           },
         });
       } else {

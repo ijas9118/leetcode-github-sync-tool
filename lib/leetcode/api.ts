@@ -1,8 +1,9 @@
 import { APP_CONFIG, LEETCODE_API } from "@/constants/config";
 import { ErrorCode } from "@/lib/api/errors";
 import { ApiError } from "@/lib/api/response";
-import { stripHtml } from "@/lib/leetcode/parser";
 import { Difficulty, LeetCodeProblem } from "@/types/api";
+
+import { stripHtml } from "../utils/text";
 
 const PROBLEM_QUERY = `
   query questionData($titleSlug: String!) {

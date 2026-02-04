@@ -1,3 +1,4 @@
+import { slugify, stripHtml, truncateContent } from "@/lib/utils/text";
 import { LeetCodeProblem, SolutionData, SupportedLanguage } from "@/types/api";
 
 /**
@@ -11,10 +12,7 @@ export function generateFilePath(
   isReadme: boolean = false
 ): string {
   // Create slug from title
-  const slug = title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
+  const slug = slugify(title);
 
   const folderName = `${problemNumber}-${slug}`;
   const fileName = isReadme ? "README.md" : `solution`;
@@ -62,7 +60,7 @@ export function generateReadmeContent(
 
 ## Problem Description
 
-${problemData.content.replace(/<[^>]+>/g, "").substring(0, 500)}...
+${truncateContent(stripHtml(problemData.content), 500)}
 
 [View full problem on LeetCode](${problemData.problemUrl})
 

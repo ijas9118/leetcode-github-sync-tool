@@ -1,36 +1,8 @@
+import { stripHtml } from "@/lib/utils/text";
+
 /**
  * Helper functions for parsing LeetCode problem content
  */
-
-/**
- * Remove HTML tags from string
- */
-export function stripHtml(html: string): string {
-  // Remove HTML tags
-  let text = html.replace(/<[^>]+>/g, " ");
-
-  // Decode common HTML entities
-  text = text
-    .replace(/&nbsp;/g, " ")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&#x27;/g, "'")
-    .replace(/&ldquo;/g, '"')
-    .replace(/&rdquo;/g, '"')
-    .replace(/&lsquo;/g, "'")
-    .replace(/&rsquo;/g, "'")
-    .replace(/<sup>/g, "^")
-    .replace(/<\/sup>/g, "");
-
-  // Clean up whitespace
-  text = text.replace(/\s+/g, " ");
-  text = text.replace(/\n\s+/g, "\n");
-
-  return text.trim();
-}
 
 /**
  * Parse examples from problem content

@@ -1,12 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
+import { APP_CONFIG } from "@/constants/config";
+import { ErrorCode } from "@/lib/api/errors";
+import { errorResponse, successResponse } from "@/lib/api/response";
 import { env } from "@/lib/env";
-import {
-  type GitHubConfig,
-  type ProblemData,
-  pushToGitHub,
-  type SolutionData,
-} from "@/lib/github-utils";
+import { pushToGitHub } from "@/lib/github/api";
+import { GitHubConfig, LeetCodeProblem, SolutionData } from "@/types/api";
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,14 +16,15 @@ export async function POST(request: NextRequest) {
       token: env.GITHUB_TOKEN,
       owner: env.GITHUB_OWNER,
       repo: env.GITHUB_REPO,
-      branch: env.GITHUB_BRANCH,
+      branch: env.GITHUB_BRANCH || APP_CONFIG.DEFAULT_BRANCH,
     };
 
     // Validate request data
     if (!problemData || !solutionData) {
-      return NextResponse.json(
-        { success: false, error: "Missing problem or solution data" },
-        { status: 400 }
+      return errorResponse(
+        "Missing problem or solution data",
+        400,
+        ErrorCode.VALIDATION_ERROR
       );
     }
 
@@ -35,43 +35,41 @@ export async function POST(request: NextRequest) {
       !solutionData.category ||
       !solutionData.subcategory
     ) {
-      return NextResponse.json(
-        { success: false, error: "Missing required solution fields" },
-        { status: 400 }
+      return errorResponse(
+        "Missing required solution fields",
+        400,
+        ErrorCode.VALIDATION_ERROR
       );
     }
 
     // Push to GitHub
     const result = await pushToGitHub(
       config,
-      problemData as ProblemData,
+      problemData as LeetCodeProblem,
       solutionData as SolutionData
     );
 
     if (result.success) {
-      return NextResponse.json({
-        success: true,
-        readmeUrl: result.readmeUrl,
-        solutionUrl: result.solutionUrl,
-        message: "Successfully pushed to GitHub!",
-      });
-    } else {
-      return NextResponse.json(
+      return successResponse(
         {
-          success: false,
-          error: result.error || "Failed to push to GitHub",
+          readmeUrl: result.readmeUrl,
+          solutionUrl: result.solutionUrl,
         },
-        { status: 500 }
+        "Successfully pushed to GitHub!"
+      );
+    } else {
+      return errorResponse(
+        result.error || "Failed to push to GitHub",
+        500,
+        ErrorCode.EXTERNAL_API_ERROR
       );
     }
   } catch (error) {
     console.error("GitHub push error:", error);
-    return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : "Push failed",
-      },
-      { status: 500 }
+    return errorResponse(
+      error instanceof Error ? error.message : "Push failed",
+      500,
+      ErrorCode.INTERNAL_ERROR
     );
   }
 }

@@ -1,5 +1,5 @@
-import { NextResponse } from "next/server";
-
+import { ErrorCode } from "@/lib/api/errors";
+import { errorResponse, successResponse } from "@/lib/api/response";
 import { env } from "@/lib/env";
 
 export async function GET() {
@@ -11,12 +11,13 @@ export async function GET() {
       branch: env.GITHUB_BRANCH,
     };
 
-    return NextResponse.json(config);
+    return successResponse(config);
   } catch (error) {
     console.error("GitHub config error:", error);
-    return NextResponse.json(
-      { error: "Failed to get GitHub config" },
-      { status: 500 }
+    return errorResponse(
+      "Failed to get GitHub config",
+      500,
+      ErrorCode.INTERNAL_ERROR
     );
   }
 }
