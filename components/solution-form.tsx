@@ -1,10 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { Resolver } from "react-hook-form";
 import { useForm } from "react-hook-form";
 
+import { generatePreviewReadme } from "@/lib/github-utils";
 import {
   validateSolutionForm,
   type ValidationResult,
@@ -18,7 +20,9 @@ import {
 } from "@/lib/validations";
 
 import { CodeEditor } from "./code-editor";
+import { FolderTreePreview } from "./folder-tree-preview";
 import { ManualEntryForm, type ManualProblemData } from "./manual-entry-form";
+import { MarkdownPreview } from "./markdown-preview";
 import { ProblemPreview } from "./problem-preview";
 import { ValidationChecklist } from "./validation-checklist";
 
@@ -59,6 +63,10 @@ export function SolutionForm() {
   } | null>(null);
   const [validationResult, setValidationResult] =
     useState<ValidationResult | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewTab, setPreviewTab] = useState<
+    "readme" | "solution" | "folder"
+  >("readme");
 
   const form = useForm<SolutionFormValues>({
     resolver: zodResolver(solutionFormSchema) as Resolver<SolutionFormValues>,
@@ -749,6 +757,109 @@ O(n) - hash map storage"
         {/* Validation Checklist - Show when validation fails */}
         {validationResult && !validationResult.isValid && (
           <ValidationChecklist validationResult={validationResult} />
+        )}
+
+        {/* Preview Toggle Button */}
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => setShowPreview(!showPreview)}
+            className="flex items-center gap-2 rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:text-white dark:hover:bg-zinc-900"
+          >
+            {showPreview ? (
+              <>
+                <EyeOff className="h-4 w-4" />
+                Hide Preview
+              </>
+            ) : (
+              <>
+                <Eye className="h-4 w-4" />
+                Preview README & Structure
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Preview Section */}
+        {showPreview && (
+          <div className="mt-6 overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-800">
+            {/* Tab Switcher */}
+            <div className="flex border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900">
+              <button
+                type="button"
+                onClick={() => setPreviewTab("readme")}
+                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                  previewTab === "readme"
+                    ? "border-b-2 border-black bg-white text-black dark:border-white dark:bg-black dark:text-white"
+                    : "text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-white"
+                }`}
+              >
+                📄 README Preview
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewTab("solution")}
+                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                  previewTab === "solution"
+                    ? "border-b-2 border-black bg-white text-black dark:border-white dark:bg-black dark:text-white"
+                    : "text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-white"
+                }`}
+              >
+                💻 Solution Preview
+              </button>
+              <button
+                type="button"
+                onClick={() => setPreviewTab("folder")}
+                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                  previewTab === "folder"
+                    ? "border-b-2 border-black bg-white text-black dark:border-white dark:bg-black dark:text-white"
+                    : "text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-white"
+                }`}
+              >
+                📁 Folder Structure
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            <div className="max-h-[600px] overflow-y-auto bg-white p-6 dark:bg-black">
+              {previewTab === "readme" && (
+                <MarkdownPreview
+                  content={generatePreviewReadme(problemData, {
+                    approach: watch("manualApproach") || "",
+                    timeComplexity: watch("timeComplexity") || "",
+                    spaceComplexity: watch("spaceComplexity") || "",
+                    language: watch("language") || "",
+                    solutionCode: watch("solutionCode") || "",
+                  })}
+                />
+              )}
+
+              {previewTab === "solution" && (
+                <div className="space-y-2">
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                    Solution code preview:
+                  </p>
+                  <CodeEditor
+                    value={watch("solutionCode") || "// No solution code yet"}
+                    onChange={() => {}}
+                    language={watch("language") || "typescript"}
+                    height="400px"
+                    options={{ readOnly: true }}
+                  />
+                </div>
+              )}
+
+              {previewTab === "folder" && (
+                <FolderTreePreview
+                  category={watch("category") || ""}
+                  subcategory={watch("subcategory") || ""}
+                  problemNumber={watch("problemNumber") || ""}
+                  problemTitle={problemData?.title || ""}
+                  language={watch("language") || ""}
+                />
+              )}
+            </div>
+          </div>
         )}
 
         <button

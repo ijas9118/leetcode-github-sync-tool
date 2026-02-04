@@ -85,6 +85,50 @@ export function getFileExtension(language: string): string {
   return extensions[language] || "txt";
 }
 
+// Generate preview README content for the form preview
+export function generatePreviewReadme(
+  problemData: ProblemData | null,
+  formValues: {
+    approach: string;
+    timeComplexity: string;
+    spaceComplexity: string;
+    language: string;
+    solutionCode: string;
+  }
+): string {
+  if (!problemData) {
+    return `# Preview README
+
+*Fetch a problem to see the full preview*
+
+## Solution Approach
+
+${formValues.approach || "*No approach provided yet*"}
+
+**Time Complexity**: ${formValues.timeComplexity || "Not specified"}  
+**Space Complexity**: ${formValues.spaceComplexity || "Not specified"}
+
+## Solution Code
+
+\`\`\`${formValues.language || "typescript"}
+${formValues.solutionCode || "// Your solution code will appear here"}
+\`\`\`
+`;
+  }
+
+  const solutionData: SolutionData = {
+    code: formValues.solutionCode,
+    language: formValues.language as SolutionData["language"],
+    approach: formValues.approach || "*No approach provided yet*",
+    timeComplexity: formValues.timeComplexity,
+    spaceComplexity: formValues.spaceComplexity,
+    category: "arrays", // Not used in README generation but required by interface
+    subcategory: "other", // Not used in README generation but required by interface
+  };
+
+  return generateReadmeContent(problemData, solutionData);
+}
+
 // Generate README content
 export function generateReadmeContent(
   problemData: ProblemData,

@@ -8,6 +8,7 @@ interface CodeEditorProps {
   onChange: (value: string) => void;
   language: string;
   height?: string;
+  options?: Record<string, unknown>;
 }
 
 export function CodeEditor({
@@ -15,6 +16,7 @@ export function CodeEditor({
   onChange,
   language,
   height = "400px",
+  options = {},
 }: CodeEditorProps) {
   const { theme } = useTheme();
 
@@ -47,6 +49,7 @@ export function CodeEditor({
           tabSize: 2,
           wordWrap: "on",
           padding: { top: 16, bottom: 16 },
+          ...options, // Allow overriding with custom options
         }}
       />
     </div>
