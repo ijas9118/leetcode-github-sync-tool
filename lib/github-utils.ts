@@ -22,8 +22,8 @@ export interface SolutionData {
   category: string;
   subcategory: string;
   approach: string;
-  timeComplexity?: string;
-  spaceComplexity?: string;
+  timeComplexity: string;
+  spaceComplexity: string;
 }
 
 // Validate GitHub token by checking user authentication
@@ -35,7 +35,7 @@ export async function validateGitHubToken(token: string): Promise<{
   try {
     const octokit = new Octokit({ auth: token });
     const { data } = await octokit.rest.users.getAuthenticated();
-    
+
     return {
       valid: true,
       user: {
@@ -64,10 +64,10 @@ export function generateFilePath(
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
-  
+
   const folderName = `${problemNumber}-${slug}`;
   const fileName = isReadme ? "README.md" : `solution`;
-  
+
   return `${category}/${subcategory}/${folderName}/${fileName}`;
 }
 
@@ -81,7 +81,7 @@ export function getFileExtension(language: string): string {
     cpp: "cpp",
     go: "go",
   };
-  
+
   return extensions[language] || "txt";
 }
 
@@ -90,11 +90,12 @@ export function generateReadmeContent(
   problemData: ProblemData,
   solutionData: SolutionData
 ): string {
-  const difficultyBadge = {
-    Easy: "🟢 Easy",
-    Medium: "🟧 Medium",
-    Hard: "🔴 Hard",
-  }[problemData.difficulty] || problemData.difficulty;
+  const difficultyBadge =
+    {
+      Easy: "🟢 Easy",
+      Medium: "🟧 Medium",
+      Hard: "🔴 Hard",
+    }[problemData.difficulty] || problemData.difficulty;
 
   return `# ${problemData.questionFrontendId}. ${problemData.title}
 
@@ -116,8 +117,8 @@ ${problemData.content.replace(/<[^>]+>/g, "").substring(0, 500)}...
 
 ${solutionData.approach}
 
-${solutionData.timeComplexity ? `\n**Time Complexity**: ${solutionData.timeComplexity}` : ""}
-${solutionData.spaceComplexity ? `\n**Space Complexity**: ${solutionData.spaceComplexity}` : ""}
+**Time Complexity**: ${solutionData.timeComplexity}  
+**Space Complexity**: ${solutionData.spaceComplexity}
 
 ---
 
@@ -156,7 +157,7 @@ export async function pushToGitHub(
       problemData.title,
       true
     );
-    
+
     const solutionPath = `${generateFilePath(
       solutionData.category,
       solutionData.subcategory,
@@ -264,7 +265,8 @@ export async function pushToGitHub(
     console.error("GitHub push error:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to push to GitHub",
+      error:
+        error instanceof Error ? error.message : "Failed to push to GitHub",
     };
   }
 }

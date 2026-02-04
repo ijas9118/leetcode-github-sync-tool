@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { X, Check, AlertCircle } from "lucide-react";
+import { AlertCircle, Check, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface GitHubSettingsModalProps {
   isOpen: boolean;
@@ -15,14 +15,17 @@ interface GitHubSettings {
   branch: string;
 }
 
-export function GitHubSettingsModal({ isOpen, onClose }: GitHubSettingsModalProps) {
+export function GitHubSettingsModal({
+  isOpen,
+  onClose,
+}: GitHubSettingsModalProps) {
   const [settings, setSettings] = useState<GitHubSettings>({
     token: "",
     owner: "ijas9118",
     repo: "my-leetcode-docs",
     branch: "main",
   });
-  
+
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{
     success: boolean;
@@ -92,7 +95,7 @@ export function GitHubSettingsModal({ isOpen, onClose }: GitHubSettingsModalProp
     // Basic encoding (not encryption, just obfuscation)
     const encoded = btoa(JSON.stringify(settings));
     localStorage.setItem("github-settings", encoded);
-    
+
     alert("GitHub settings saved!");
     onClose();
   };
@@ -100,10 +103,10 @@ export function GitHubSettingsModal({ isOpen, onClose }: GitHubSettingsModalProp
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-black border border-zinc-200 dark:border-zinc-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-black">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-zinc-200 dark:border-zinc-800">
+        <div className="flex items-center justify-between border-b border-zinc-200 p-6 dark:border-zinc-800">
           <h2 className="text-xl font-semibold text-black dark:text-white">
             ⚙️ GitHub Settings
           </h2>
@@ -111,14 +114,14 @@ export function GitHubSettingsModal({ isOpen, onClose }: GitHubSettingsModalProp
             onClick={onClose}
             className="text-zinc-500 hover:text-black dark:hover:text-white"
           >
-            <X className="w-5 h-5" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6 space-y-6">
+        <div className="space-y-6 p-6">
           {/* Info Box */}
-          <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950/20">
             <p className="text-sm text-blue-900 dark:text-blue-200">
               <strong>How to get a GitHub Personal Access Token:</strong>
               <br />
@@ -134,7 +137,11 @@ export function GitHubSettingsModal({ isOpen, onClose }: GitHubSettingsModalProp
               <br />
               2. Click &quot;Generate new token (classic)&quot;
               <br />
-              3. Select <code className="bg-blue-100 dark:bg-blue-900 px-1 rounded">repo</code> scope
+              3. Select{" "}
+              <code className="rounded bg-blue-100 px-1 dark:bg-blue-900">
+                repo
+              </code>{" "}
+              scope
               <br />
               4. Copy the token and paste it below
             </p>
@@ -142,15 +149,17 @@ export function GitHubSettingsModal({ isOpen, onClose }: GitHubSettingsModalProp
 
           {/* Token Input */}
           <div>
-            <label className="block text-sm font-medium text-black dark:text-white mb-2">
+            <label className="mb-2 block text-sm font-medium text-black dark:text-white">
               GitHub Personal Access Token *
             </label>
             <input
               type="password"
               value={settings.token}
-              onChange={(e) => setSettings({ ...settings, token: e.target.value })}
+              onChange={(e) =>
+                setSettings({ ...settings, token: e.target.value })
+              }
               placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-              className="w-full px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black text-black dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white font-mono text-sm"
+              className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2 font-mono text-sm text-black placeholder:text-zinc-400 focus:ring-2 focus:ring-black focus:outline-none dark:border-zinc-800 dark:bg-black dark:text-white dark:focus:ring-white"
             />
             <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
               Your token is stored locally in your browser only
@@ -161,7 +170,7 @@ export function GitHubSettingsModal({ isOpen, onClose }: GitHubSettingsModalProp
           <button
             onClick={testConnection}
             disabled={testing || !settings.token}
-            className="w-full px-4 py-2 rounded-lg bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-lg bg-black px-4 py-2 font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
           >
             {testing ? "Testing..." : "🔌 Test Connection"}
           </button>
@@ -169,16 +178,16 @@ export function GitHubSettingsModal({ isOpen, onClose }: GitHubSettingsModalProp
           {/* Test Result */}
           {testResult && (
             <div
-              className={`flex items-start gap-3 p-4 rounded-lg border ${
+              className={`flex items-start gap-3 rounded-lg border p-4 ${
                 testResult.success
-                  ? "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800"
-                  : "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800"
+                  ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20"
+                  : "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20"
               }`}
             >
               {testResult.success ? (
-                <Check className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
+                <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-green-600 dark:text-green-400" />
               ) : (
-                <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600 dark:text-red-400" />
               )}
               <div>
                 <p
@@ -191,7 +200,7 @@ export function GitHubSettingsModal({ isOpen, onClose }: GitHubSettingsModalProp
                   {testResult.message}
                 </p>
                 {testResult.user?.name && (
-                  <p className="text-xs text-green-700 dark:text-green-300 mt-1">
+                  <p className="mt-1 text-xs text-green-700 dark:text-green-300">
                     {testResult.user.name}
                   </p>
                 )}
@@ -200,68 +209,81 @@ export function GitHubSettingsModal({ isOpen, onClose }: GitHubSettingsModalProp
           )}
 
           {/* Repository Settings */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-black dark:text-white mb-2">
+              <label className="mb-2 block text-sm font-medium text-black dark:text-white">
                 Repository Owner *
               </label>
               <input
                 type="text"
                 value={settings.owner}
-                onChange={(e) => setSettings({ ...settings, owner: e.target.value })}
+                onChange={(e) =>
+                  setSettings({ ...settings, owner: e.target.value })
+                }
                 placeholder="username"
-                className="w-full px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black text-black dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+                className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2 text-black placeholder:text-zinc-400 focus:ring-2 focus:ring-black focus:outline-none dark:border-zinc-800 dark:bg-black dark:text-white dark:focus:ring-white"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-black dark:text-white mb-2">
+              <label className="mb-2 block text-sm font-medium text-black dark:text-white">
                 Repository Name *
               </label>
               <input
                 type="text"
                 value={settings.repo}
-                onChange={(e) => setSettings({ ...settings, repo: e.target.value })}
+                onChange={(e) =>
+                  setSettings({ ...settings, repo: e.target.value })
+                }
                 placeholder="my-leetcode-docs"
-                className="w-full px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black text-black dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+                className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2 text-black placeholder:text-zinc-400 focus:ring-2 focus:ring-black focus:outline-none dark:border-zinc-800 dark:bg-black dark:text-white dark:focus:ring-white"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-black dark:text-white mb-2">
+            <label className="mb-2 block text-sm font-medium text-black dark:text-white">
               Branch *
             </label>
             <input
               type="text"
               value={settings.branch}
-              onChange={(e) => setSettings({ ...settings, branch: e.target.value })}
+              onChange={(e) =>
+                setSettings({ ...settings, branch: e.target.value })
+              }
               placeholder="main"
-              className="w-full px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black text-black dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+              className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2 text-black placeholder:text-zinc-400 focus:ring-2 focus:ring-black focus:outline-none dark:border-zinc-800 dark:bg-black dark:text-white dark:focus:ring-white"
             />
           </div>
 
           {/* Repository URL Preview */}
-          <div className="bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-1">Repository URL:</p>
-            <p className="text-sm text-black dark:text-white font-mono break-all">
+          <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900">
+            <p className="mb-1 text-xs text-zinc-500 dark:text-zinc-400">
+              Repository URL:
+            </p>
+            <p className="font-mono text-sm break-all text-black dark:text-white">
               https://github.com/{settings.owner}/{settings.repo}
             </p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-zinc-200 dark:border-zinc-800 flex gap-3">
+        <div className="flex gap-3 border-t border-zinc-200 p-6 dark:border-zinc-800">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 text-black dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+            className="flex-1 rounded-lg border border-zinc-200 px-4 py-2 text-black transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:text-white dark:hover:bg-zinc-900"
           >
             Cancel
           </button>
           <button
             onClick={saveSettings}
-            disabled={!settings.token || !settings.owner || !settings.repo || !settings.branch}
-            className="flex-1 px-4 py-2 rounded-lg bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={
+              !settings.token ||
+              !settings.owner ||
+              !settings.repo ||
+              !settings.branch
+            }
+            className="flex-1 rounded-lg bg-black px-4 py-2 font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
           >
             💾 Save Settings
           </button>

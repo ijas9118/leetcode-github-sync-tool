@@ -10,7 +10,12 @@ interface CodeEditorProps {
   height?: string;
 }
 
-export function CodeEditor({ value, onChange, language, height = "400px" }: CodeEditorProps) {
+export function CodeEditor({
+  value,
+  onChange,
+  language,
+  height = "400px",
+}: CodeEditorProps) {
   const { theme } = useTheme();
 
   const getMonacoLanguage = (lang: string) => {
@@ -26,7 +31,7 @@ export function CodeEditor({ value, onChange, language, height = "400px" }: Code
   };
 
   return (
-    <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
+    <div className="overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-800">
       <Editor
         height={height}
         language={getMonacoLanguage(language)}

@@ -1,13 +1,26 @@
 "use client";
 
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useEffect } from "react";
-import { solutionFormSchema, type SolutionFormValues, languageOptions, categoryOptions, subcategoryOptions } from "@/lib/validations";
-import { CodeEditor } from "./code-editor";
-import { ProblemPreview } from "./problem-preview";
-import { ManualEntryForm, type ManualProblemData } from "./manual-entry-form";
+import { useEffect, useState } from "react";
 import type { Resolver } from "react-hook-form";
+import { useForm } from "react-hook-form";
+
+import {
+  validateSolutionForm,
+  type ValidationResult,
+} from "@/lib/validation-utils";
+import {
+  categoryOptions,
+  languageOptions,
+  solutionFormSchema,
+  type SolutionFormValues,
+  subcategoryOptions,
+} from "@/lib/validations";
+
+import { CodeEditor } from "./code-editor";
+import { ManualEntryForm, type ManualProblemData } from "./manual-entry-form";
+import { ProblemPreview } from "./problem-preview";
+import { ValidationChecklist } from "./validation-checklist";
 
 interface LeetCodeProblem {
   questionFrontendId: string;
@@ -33,17 +46,28 @@ export function SolutionForm() {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [showManualEntry, setShowManualEntry] = useState(false);
   const [pushing, setPushing] = useState(false);
-  const [pushResult, setPushResult] = useState<{ success: boolean; message: string; urls?: { readme?: string; solution?: string } } | null>(null);
-  const [githubConfig, setGithubConfig] = useState<{ hasToken: boolean; owner: string; repo: string; branch: string } | null>(null);
-  
+  const [pushResult, setPushResult] = useState<{
+    success: boolean;
+    message: string;
+    urls?: { readme?: string; solution?: string };
+  } | null>(null);
+  const [githubConfig, setGithubConfig] = useState<{
+    hasToken: boolean;
+    owner: string;
+    repo: string;
+    branch: string;
+  } | null>(null);
+  const [validationResult, setValidationResult] =
+    useState<ValidationResult | null>(null);
+
   const form = useForm<SolutionFormValues>({
     resolver: zodResolver(solutionFormSchema) as Resolver<SolutionFormValues>,
     defaultValues: {
       problemNumber: "",
-      language: "typescript",
+      language: "",
       solutionCode: "",
-      category: "arrays",
-      subcategory: "binary-search",
+      category: "",
+      subcategory: "",
       difficulty: "Medium",
       useAI: true,
       manualApproach: "",
@@ -79,7 +103,9 @@ export function SolutionForm() {
     setShowManualEntry(false);
 
     try {
-      const response = await fetch(`/api/leetcode/fetch-problem?number=${problemNumber}`);
+      const response = await fetch(
+        `/api/leetcode/fetch-problem?number=${problemNumber}`
+      );
       const data = await response.json();
 
       if (!response.ok) {
@@ -87,7 +113,7 @@ export function SolutionForm() {
       }
 
       setProblemData(data);
-      
+
       // Auto-fill difficulty if available
       if (data.difficulty) {
         setValue("difficulty", data.difficulty as "Easy" | "Medium" | "Hard");
@@ -95,7 +121,9 @@ export function SolutionForm() {
 
       setFetchError(null);
     } catch (error) {
-      setFetchError(error instanceof Error ? error.message : "Failed to fetch problem");
+      setFetchError(
+        error instanceof Error ? error.message : "Failed to fetch problem"
+      );
       setProblemData(null);
     } finally {
       setFetchLoading(false);
@@ -117,7 +145,7 @@ export function SolutionForm() {
       constraints: data.constraints,
       isManual: true,
     };
-    
+
     setProblemData(manualProblemData);
     setShowManualEntry(false);
     setFetchError(null);
@@ -196,10 +224,54 @@ Format your response in Markdown with clear sections.`;
     fetchGithubConfig();
   }, []);
 
+  // Auto-validate form whenever data changes
+  useEffect(() => {
+    const subscription = watch((values) => {
+      const result = validateSolutionForm(
+        {
+          problemNumber: values.problemNumber,
+          solutionCode: values.solutionCode,
+          language: values.language,
+          category: values.category,
+          subcategory: values.subcategory,
+          manualApproach: values.manualApproach,
+          timeComplexity: values.timeComplexity,
+          spaceComplexity: values.spaceComplexity,
+        },
+        problemData,
+        githubConfig
+      );
+      setValidationResult(result);
+    });
+
+    // Run validation immediately on mount/when dependencies change
+    const values = watch();
+    const result = validateSolutionForm(
+      {
+        problemNumber: values.problemNumber,
+        solutionCode: values.solutionCode,
+        language: values.language,
+        category: values.category,
+        subcategory: values.subcategory,
+        manualApproach: values.manualApproach,
+        timeComplexity: values.timeComplexity,
+        spaceComplexity: values.spaceComplexity,
+      },
+      problemData,
+      githubConfig
+    );
+    setValidationResult(result);
+
+    return () => subscription.unsubscribe();
+  }, [problemData, githubConfig, watch]);
+
   //  Push to GitHub
   const pushToGitHub = async () => {
     if (!problemData) {
-      setPushResult({ success: false, message: "Please fetch a problem first" });
+      setPushResult({
+        success: false,
+        message: "Please fetch a problem first",
+      });
       return;
     }
 
@@ -210,7 +282,10 @@ Format your response in Markdown with clear sections.`;
     }
 
     if (!values.manualApproach) {
-      setPushResult({ success: false, message: "Please enter solution approach" });
+      setPushResult({
+        success: false,
+        message: "Please enter solution approach",
+      });
       return;
     }
 
@@ -262,7 +337,8 @@ Format your response in Markdown with clear sections.`;
     } catch (error) {
       setPushResult({
         success: false,
-        message: error instanceof Error ? error.message : "Failed to push to GitHub",
+        message:
+          error instanceof Error ? error.message : "Failed to push to GitHub",
       });
     } finally {
       setPushing(false);
@@ -277,15 +353,21 @@ Format your response in Markdown with clear sections.`;
   const handleReset = () => {
     reset();
     localStorage.removeItem("leetcode-form-draft");
+    setProblemData(null);
+    setFetchError(null);
     setPushResult(null);
+    setShowManualEntry(false);
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* Problem Number and Language */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>
-          <label htmlFor="problemNumber" className="block text-sm font-medium text-black dark:text-white mb-2">
+          <label
+            htmlFor="problemNumber"
+            className="mb-2 block text-sm font-medium text-black dark:text-white"
+          >
             Problem Number <span className="text-red-500">*</span>
           </label>
           <input
@@ -293,22 +375,30 @@ Format your response in Markdown with clear sections.`;
             type="text"
             id="problemNumber"
             placeholder="e.g., 1358"
-            className="w-full px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black text-black dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2 text-black placeholder:text-zinc-400 focus:ring-2 focus:ring-black focus:outline-none dark:border-zinc-800 dark:bg-black dark:text-white dark:focus:ring-white"
           />
           {errors.problemNumber && (
-            <p className="mt-1 text-sm text-red-500">{errors.problemNumber.message}</p>
+            <p className="mt-1 text-sm text-red-500">
+              {errors.problemNumber.message}
+            </p>
           )}
         </div>
 
         <div>
-          <label htmlFor="language" className="block text-sm font-medium text-black dark:text-white mb-2">
+          <label
+            htmlFor="language"
+            className="mb-2 block text-sm font-medium text-black dark:text-white"
+          >
             Language <span className="text-red-500">*</span>
           </label>
           <select
             {...register("language")}
             id="language"
-            className="w-full px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2 text-black focus:ring-2 focus:ring-black focus:outline-none dark:border-zinc-800 dark:bg-black dark:text-white dark:focus:ring-white"
           >
+            <option value="" disabled>
+              Select Language
+            </option>
             {languageOptions.map((lang) => (
               <option key={lang.value} value={lang.value}>
                 {lang.label}
@@ -316,7 +406,9 @@ Format your response in Markdown with clear sections.`;
             ))}
           </select>
           {errors.language && (
-            <p className="mt-1 text-sm text-red-500">{errors.language.message}</p>
+            <p className="mt-1 text-sm text-red-500">
+              {errors.language.message}
+            </p>
           )}
         </div>
       </div>
@@ -327,11 +419,11 @@ Format your response in Markdown with clear sections.`;
           type="button"
           onClick={fetchProblemDetails}
           disabled={!problemNumber || fetchLoading}
-          className="w-full px-4 py-3 rounded-lg border-2 border-zinc-200 dark:border-zinc-800 text-black dark:text-white font-medium hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-zinc-200 px-4 py-3 font-medium text-black transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:text-white dark:hover:bg-zinc-900"
         >
           {fetchLoading ? (
             <>
-              <div className="w-4 h-4 border-2 border-black dark:border-white border-t-transparent dark:border-t-transparent rounded-full animate-spin" />
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-black border-t-transparent dark:border-white dark:border-t-transparent" />
               Fetching Problem Details...
             </>
           ) : (
@@ -347,9 +439,11 @@ Format your response in Markdown with clear sections.`;
           <button
             type="button"
             onClick={() => setShowManualEntry(!showManualEntry)}
-            className="w-full px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 text-black dark:text-white text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+            className="w-full rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:text-white dark:hover:bg-zinc-900"
           >
-            {showManualEntry ? "Hide Manual Entry" : "📝 Enter Problem Details Manually"}
+            {showManualEntry
+              ? "Hide Manual Entry"
+              : "📝 Enter Problem Details Manually"}
           </button>
         )}
       </div>
@@ -359,12 +453,19 @@ Format your response in Markdown with clear sections.`;
 
       {/* Problem Preview */}
       {!showManualEntry && (
-        <ProblemPreview problem={problemData} loading={fetchLoading} error={fetchError} />
+        <ProblemPreview
+          problem={problemData}
+          loading={fetchLoading}
+          error={fetchError}
+        />
       )}
 
       {/* Solution Code */}
       <div>
-        <label htmlFor="solutionCode" className="block text-sm font-medium text-black dark:text-white mb-2">
+        <label
+          htmlFor="solutionCode"
+          className="mb-2 block text-sm font-medium text-black dark:text-white"
+        >
           Solution Code <span className="text-red-500">*</span>
         </label>
         <CodeEditor
@@ -373,21 +474,29 @@ Format your response in Markdown with clear sections.`;
           language={language}
         />
         {errors.solutionCode && (
-          <p className="mt-1 text-sm text-red-500">{errors.solutionCode.message}</p>
+          <p className="mt-1 text-sm text-red-500">
+            {errors.solutionCode.message}
+          </p>
         )}
       </div>
 
       {/* Category and Subcategory */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>
-          <label htmlFor="category" className="block text-sm font-medium text-black dark:text-white mb-2">
+          <label
+            htmlFor="category"
+            className="mb-2 block text-sm font-medium text-black dark:text-white"
+          >
             Data Structure Category <span className="text-red-500">*</span>
           </label>
           <select
             {...register("category")}
             id="category"
-            className="w-full px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2 text-black focus:ring-2 focus:ring-black focus:outline-none dark:border-zinc-800 dark:bg-black dark:text-white dark:focus:ring-white"
           >
+            <option value="" disabled>
+              Select Category
+            </option>
             {categoryOptions.map((cat) => (
               <option key={cat.value} value={cat.value}>
                 {cat.label}
@@ -395,72 +504,90 @@ Format your response in Markdown with clear sections.`;
             ))}
           </select>
           {errors.category && (
-            <p className="mt-1 text-sm text-red-500">{errors.category.message}</p>
+            <p className="mt-1 text-sm text-red-500">
+              {errors.category.message}
+            </p>
           )}
         </div>
 
         <div>
-          <label htmlFor="subcategory" className="block text-sm font-medium text-black dark:text-white mb-2">
+          <label
+            htmlFor="subcategory"
+            className="mb-2 block text-sm font-medium text-black dark:text-white"
+          >
             Sub-category <span className="text-red-500">*</span>
           </label>
           <select
             {...register("subcategory")}
             id="subcategory"
-            className="w-full px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2 text-black focus:ring-2 focus:ring-black focus:outline-none dark:border-zinc-800 dark:bg-black dark:text-white dark:focus:ring-white"
           >
+            <option value="" disabled>
+              Select Subcategory
+            </option>
             {(subcategoryOptions[category] || ["other"]).map((subcat) => (
               <option key={subcat} value={subcat}>
-                {subcat.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")}
+                {subcat
+                  .split("-")
+                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(" ")}
               </option>
             ))}
           </select>
           {errors.subcategory && (
-            <p className="mt-1 text-sm text-red-500">{errors.subcategory.message}</p>
+            <p className="mt-1 text-sm text-red-500">
+              {errors.subcategory.message}
+            </p>
           )}
         </div>
       </div>
 
       {/* Difficulty */}
       <div>
-        <label className="block text-sm font-medium text-black dark:text-white mb-2">
+        <label className="mb-2 block text-sm font-medium text-black dark:text-white">
           Difficulty <span className="text-red-500">*</span>
         </label>
         <div className="flex gap-4">
           {(["Easy", "Medium", "Hard"] as const).map((diff) => (
-            <label key={diff} className="flex items-center gap-2 cursor-pointer">
+            <label
+              key={diff}
+              className="flex cursor-pointer items-center gap-2"
+            >
               <input
                 {...register("difficulty")}
                 type="radio"
                 value={diff}
-                className="w-4 h-4 border-zinc-300 dark:border-zinc-700"
+                className="h-4 w-4 border-zinc-300 dark:border-zinc-700"
               />
               <span className="text-sm text-black dark:text-white">
-                {diff === "Easy" && "🟢"} {diff === "Medium" && "🟧"} {diff === "Hard" && "🔴"} {diff}
+                {diff === "Easy" && "🟢"} {diff === "Medium" && "🟧"}{" "}
+                {diff === "Hard" && "🔴"} {diff}
               </span>
             </label>
           ))}
         </div>
         {errors.difficulty && (
-          <p className="mt-1 text-sm text-red-500">{errors.difficulty.message}</p>
+          <p className="mt-1 text-sm text-red-500">
+            {errors.difficulty.message}
+          </p>
         )}
       </div>
 
-
       {/* Solution Approach Section */}
-      <div className="border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 space-y-4">
+      <div className="space-y-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
         <h3 className="text-sm font-semibold text-black dark:text-white">
           💡 Solution Approach
         </h3>
 
         {/* AI Prompt Template - Collapsible */}
         <details className="group">
-          <summary className="cursor-pointer text-sm text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white flex items-center gap-2">
+          <summary className="flex cursor-pointer items-center gap-2 text-sm text-zinc-600 hover:text-black dark:text-zinc-400 dark:hover:text-white">
             <span className="text-lg">🤖</span>
             <span>Show AI Prompt Template (Copy to ChatGPT/Claude/Gemini)</span>
           </summary>
-          
-          <div className="mt-3 p-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg">
-            <div className="flex items-center justify-between mb-2">
+
+          <div className="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="mb-2 flex items-center justify-between">
               <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
                 Copy this prompt and paste it into your preferred AI tool
               </p>
@@ -471,20 +598,23 @@ Format your response in Markdown with clear sections.`;
                   navigator.clipboard.writeText(prompt);
                   alert("Prompt copied to clipboard!");
                 }}
-                className="px-3 py-1 text-xs rounded bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
+                className="rounded bg-black px-3 py-1 text-xs text-white transition-colors hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
               >
                 📋 Copy
               </button>
             </div>
-            <pre className="text-xs text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap font-mono overflow-x-auto">
-{generateAIPrompt()}
+            <pre className="overflow-x-auto font-mono text-xs whitespace-pre-wrap text-zinc-700 dark:text-zinc-300">
+              {generateAIPrompt()}
             </pre>
           </div>
         </details>
 
         {/* Manual Approach Input */}
         <div>
-          <label htmlFor="manualApproach" className="block text-sm font-medium text-black dark:text-white mb-2">
+          <label
+            htmlFor="manualApproach"
+            className="mb-2 block text-sm font-medium text-black dark:text-white"
+          >
             Your Solution Approach
           </label>
           <textarea
@@ -503,47 +633,55 @@ O(n) - single pass through array
 
 ## Space Complexity
 O(n) - hash map storage"
-            className="w-full px-4 py-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black text-black dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white font-mono text-sm"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 font-mono text-sm text-black placeholder:text-zinc-400 focus:ring-2 focus:ring-black focus:outline-none dark:border-zinc-800 dark:bg-black dark:text-white dark:focus:ring-white"
           />
           <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
             Tip: Use Markdown formatting. This will be displayed in your README.
           </p>
           {errors.manualApproach && (
-            <p className="mt-1 text-sm text-red-500">{errors.manualApproach.message}</p>
+            <p className="mt-1 text-sm text-red-500">
+              {errors.manualApproach.message}
+            </p>
           )}
         </div>
       </div>
       {/* Complexity Analysis */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <div>
-          <label htmlFor="timeComplexity" className="block text-sm font-medium text-black dark:text-white mb-2">
-            Time Complexity (Optional)
+          <label
+            htmlFor="timeComplexity"
+            className="mb-2 block text-sm font-medium text-black dark:text-white"
+          >
+            Time Complexity
           </label>
           <input
             {...register("timeComplexity")}
             type="text"
             id="timeComplexity"
             placeholder="e.g., O(n)"
-            className="w-full px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black text-black dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2 text-black placeholder:text-zinc-400 focus:ring-2 focus:ring-black focus:outline-none dark:border-zinc-800 dark:bg-black dark:text-white dark:focus:ring-white"
           />
         </div>
 
         <div>
-          <label htmlFor="spaceComplexity" className="block text-sm font-medium text-black dark:text-white mb-2">
-            Space Complexity (Optional)
+          <label
+            htmlFor="spaceComplexity"
+            className="mb-2 block text-sm font-medium text-black dark:text-white"
+          >
+            Space Complexity
           </label>
           <input
             {...register("spaceComplexity")}
             type="text"
             id="spaceComplexity"
             placeholder="e.g., O(1)"
-            className="w-full px-4 py-2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-black text-black dark:text-white placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+            className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2 text-black placeholder:text-zinc-400 focus:ring-2 focus:ring-black focus:outline-none dark:border-zinc-800 dark:bg-black dark:text-white dark:focus:ring-white"
           />
         </div>
       </div>
 
       {/* GitHub Push Section */}
-      <div className="border-t border-zinc-200 dark:border-zinc-800 pt-6 space-y-4">
+      <div className="space-y-4 border-t border-zinc-200 pt-6 dark:border-zinc-800">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-black dark:text-white">
             📤 Push to GitHub
@@ -566,10 +704,10 @@ O(n) - hash map storage"
         {/* Push Result */}
         {pushResult && (
           <div
-            className={`p-4 rounded-lg border ${
+            className={`rounded-lg border p-4 ${
               pushResult.success
-                ? "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800"
-                : "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800"
+                ? "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20"
+                : "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20"
             }`}
           >
             <p
@@ -588,7 +726,7 @@ O(n) - hash map storage"
                     href={pushResult.urls.readme}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-green-700 dark:text-green-300 hover:underline block"
+                    className="block text-xs text-green-700 hover:underline dark:text-green-300"
                   >
                     📄 View README on GitHub →
                   </a>
@@ -598,7 +736,7 @@ O(n) - hash map storage"
                     href={pushResult.urls.solution}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-green-700 dark:text-green-300 hover:underline block"
+                    className="block text-xs text-green-700 hover:underline dark:text-green-300"
                   >
                     💻 View Solution on GitHub →
                   </a>
@@ -608,13 +746,22 @@ O(n) - hash map storage"
           </div>
         )}
 
+        {/* Validation Checklist - Show when validation fails */}
+        {validationResult && !validationResult.isValid && (
+          <ValidationChecklist validationResult={validationResult} />
+        )}
+
         <button
           type="button"
           onClick={pushToGitHub}
-          disabled={pushing || !problemData || !githubConfig?.hasToken}
-          className="w-full px-6 py-3 rounded-lg bg-black dark:bg-white text-white dark:text-black font-medium hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={pushing || !validationResult?.isValid}
+          className="w-full rounded-lg bg-black px-6 py-3 font-medium text-white transition-colors hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
         >
-          {pushing ? "Pushing..." : "📤 Push to GitHub"}
+          {pushing
+            ? "Pushing..."
+            : !validationResult?.isValid
+              ? "Complete Required Fields"
+              : "📤 Push to GitHub"}
         </button>
       </div>
 
@@ -623,7 +770,7 @@ O(n) - hash map storage"
         <button
           type="button"
           onClick={handleReset}
-          className="px-6 py-3 rounded-lg border border-zinc-200 dark:border-zinc-800 text-black dark:text-white font-medium hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+          className="rounded-lg border border-zinc-200 px-6 py-3 font-medium text-black transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:text-white dark:hover:bg-zinc-900"
         >
           Reset Form
         </button>

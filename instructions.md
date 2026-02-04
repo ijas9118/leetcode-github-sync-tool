@@ -9,7 +9,9 @@ Build a Next.js web application that automates the process of documenting LeetCo
 ## 📋 Core Features
 
 ### 1. **Solution Input Interface**
+
 Create a clean, modern form interface where users can:
+
 - **Input Question Number** (e.g., `1358`)
 - **Select Programming Language** (TypeScript, JavaScript, Python, Java, C++, Go)
 - **Input Solution Code** (syntax-highlighted code editor)
@@ -18,6 +20,7 @@ Create a clean, modern form interface where users can:
 - **Select Difficulty Badge** (🟢 Easy, 🟧 Medium, 🔴 Hard)
 
 ### 2. **Automated LeetCode Data Fetching**
+
 - Fetch problem details using LeetCode's GraphQL API or web scraping
 - Extract:
   - Problem title
@@ -30,7 +33,9 @@ Create a clean, modern form interface where users can:
 - Display fetched data in a preview panel for user verification
 
 ### 3. **AI-Powered Approach Generation**
+
 Integrate AI (OpenAI GPT-4, Anthropic Claude, or Google Gemini) to:
+
 - Analyze the user's solution code
 - Generate a clear, beginner-friendly explanation of the approach
 - Break down the algorithm into simple steps
@@ -38,6 +43,7 @@ Integrate AI (OpenAI GPT-4, Anthropic Claude, or Google Gemini) to:
 - Include time and space complexity analysis
 
 **Toggle Option:**
+
 - Users can choose between:
   - ✅ **AI-Generated Approach** (auto-generate from solution code)
   - ✏️ **Manual Input** (write custom approach explanation)
@@ -53,6 +59,7 @@ For each problem, create a folder with the following structure:
 ```
 
 **Example:**
+
 ```
 arrays/sliding-window/1358-number-of-substrings-containing-all-three-characters/
 ├── solution.ts
@@ -63,7 +70,7 @@ arrays/sliding-window/1358-number-of-substrings-containing-all-three-characters/
 
 Generate README.md following this exact structure:
 
-```markdown
+````markdown
 # Metadata
 
 <table>
@@ -118,6 +125,7 @@ Output: [OUTPUT]
 ```[LANGUAGE]
 [USER_SOLUTION_CODE]
 ```
+````
 
 # Complexity Analysis
 
@@ -144,6 +152,7 @@ Output: [OUTPUT]
 ### 6. **Solution File Format**
 
 Create a separate solution file with the appropriate extension:
+
 - TypeScript: `solution.ts`
 - JavaScript: `solution.js`
 - Python: `solution.py`
@@ -158,12 +167,14 @@ The file should contain **only the solution code** (clean, no markdown).
 **Authentication Method: GitHub Personal Access Token (PAT)**
 
 We'll use Personal Access Tokens for simplicity and reliability:
+
 - ✅ No OAuth server needed
 - ✅ Simple one-time setup
 - ✅ Full control over permissions
 - ✅ Works perfectly for personal projects
 
 **PAT Setup Steps:**
+
 1. User generates a PAT at `github.com/settings/tokens` (classic token)
 2. Grant `repo` scope (full control of repositories)
 3. Copy token and store in app settings
@@ -171,12 +182,14 @@ We'll use Personal Access Tokens for simplicity and reliability:
 5. Use Octokit SDK for all GitHub operations
 
 **Security Notes:**
+
 - Never commit the PAT to your code
 - Store in environment variables for production
 - Implement token validation on app launch
 - Provide clear instructions for token regeneration
 
 **Repository Operations:**
+
 - Connect to repository: `github.com/ijas9118/my-leetcode-docs`
 - Check if folder/file already exists
 - Create new folders and files
@@ -185,6 +198,7 @@ We'll use Personal Access Tokens for simplicity and reliability:
 - Display success/error notifications
 
 **Commit Message Format:**
+
 ```
 Add solution for [PROBLEM_NUMBER]: [PROBLEM_TITLE]
 
@@ -196,6 +210,7 @@ Add solution for [PROBLEM_NUMBER]: [PROBLEM_TITLE]
 ### 8. **Preview & Validation**
 
 Before pushing to GitHub:
+
 - Show a live preview of generated README.md (rendered markdown)
 - Display solution code with syntax highlighting
 - Show folder structure that will be created
@@ -219,6 +234,7 @@ Before pushing to GitHub:
 ## 🛠️ Technology Stack
 
 ### Frontend
+
 - **Framework**: Next.js 14+ (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
@@ -229,17 +245,19 @@ Before pushing to GitHub:
 - **State Management**: Zustand or React Context
 
 ### APIs & Services
+
 - **LeetCode API**: GraphQL endpoint or web scraping with Cheerio/Puppeteer
-- **AI Integration**: 
+- **AI Integration**:
   - OpenAI GPT-4 API (free tier available)
   - Anthropic Claude API
   - Google Gemini API (free tier)
   - Or Hugging Face Inference API (free)
-- **GitHub API**: 
+- **GitHub API**:
   - `@octokit/rest` for GitHub operations
   - GitHub OAuth for authentication
 
 ### Deployment (Free Options)
+
 - **Hosting**: Vercel (free tier) - perfect for Next.js
 - **Alternative**: Netlify, Railway, or Render
 - **Database** (if needed): Vercel Postgres, Supabase, or PlanetScale (free tier)
@@ -251,6 +269,7 @@ Before pushing to GitHub:
 ### Using Personal Access Token (PAT)
 
 **User Setup Steps:**
+
 1. Navigate to `github.com/settings/tokens`
 2. Click "Generate new token (classic)"
 3. Give it a descriptive name (e.g., "LeetCode Automation Tool")
@@ -264,8 +283,8 @@ Before pushing to GitHub:
 import { Octokit } from "@octokit/rest";
 
 // Initialize Octokit with user's PAT
-const octokit = new Octokit({ 
-  auth: process.env.GITHUB_PAT // or from user input
+const octokit = new Octokit({
+  auth: process.env.GITHUB_PAT, // or from user input
 });
 
 // Function to create folder and files
@@ -273,7 +292,7 @@ async function pushToGitHub(problemData) {
   const owner = "ijas9118";
   const repo = "my-leetcode-docs";
   const folderPath = `${problemData.category}/${problemData.subcategory}/${problemData.problemNumber}-${problemData.slug}`;
-  
+
   try {
     // Create README.md
     await octokit.repos.createOrUpdateFileContents({
@@ -282,9 +301,9 @@ async function pushToGitHub(problemData) {
       path: `${folderPath}/README.md`,
       message: `Add solution for ${problemData.problemNumber}: ${problemData.title}`,
       content: Buffer.from(problemData.readmeContent).toString("base64"),
-      branch: "main"
+      branch: "main",
     });
-    
+
     // Create solution file
     await octokit.repos.createOrUpdateFileContents({
       owner,
@@ -292,9 +311,9 @@ async function pushToGitHub(problemData) {
       path: `${folderPath}/solution.${problemData.extension}`,
       message: `Add solution code for ${problemData.problemNumber}`,
       content: Buffer.from(problemData.solutionCode).toString("base64"),
-      branch: "main"
+      branch: "main",
     });
-    
+
     return { success: true };
   } catch (error) {
     console.error("GitHub push failed:", error);
@@ -304,20 +323,22 @@ async function pushToGitHub(problemData) {
 ```
 
 **Token Storage (Client-Side):**
+
 ```typescript
 // Store token securely
 const saveToken = (token: string) => {
-  localStorage.setItem('github_pat', btoa(token)); // Basic encoding
+  localStorage.setItem("github_pat", btoa(token)); // Basic encoding
 };
 
 // Retrieve token
 const getToken = () => {
-  const encoded = localStorage.getItem('github_pat');
+  const encoded = localStorage.getItem("github_pat");
   return encoded ? atob(encoded) : null;
 };
 ```
 
 **Token Validation:**
+
 ```typescript
 async function validateToken(token: string) {
   try {
@@ -353,6 +374,7 @@ async function validateToken(token: string) {
 ## 🎨 UI/UX Design Requirements
 
 ### Design Principles
+
 - **Modern & Minimal**: Clean interface with focus on functionality
 - **Dark Mode First**: Developer-friendly dark theme with light mode toggle
 - **Responsive**: Mobile, tablet, and desktop optimized
@@ -360,6 +382,7 @@ async function validateToken(token: string) {
 - **Premium Feel**: Use gradients, shadows, and micro-animations
 
 ### Color Scheme
+
 - **Primary**: Vibrant blue/purple gradient
 - **Background**: Deep dark (#0a0a0a) with subtle noise texture
 - **Cards**: Dark gray (#1a1a1a) with border glow
@@ -367,6 +390,7 @@ async function validateToken(token: string) {
 - **Code Blocks**: VS Code dark+ theme
 
 ### Key Components
+
 1. **Header**: Logo, GitHub connection status, theme toggle
 2. **Input Form**: Multi-step wizard or single-page form
 3. **Code Editor**: Full-screen mode, syntax highlighting
@@ -379,42 +403,49 @@ async function validateToken(token: string) {
 ## 🚀 Implementation Roadmap
 
 ### Phase 1: Core Setup
+
 - [ ] Initialize Next.js project with TypeScript
 - [ ] Setup Tailwind CSS and UI component library
 - [ ] Create basic layout and routing
 - [ ] Implement dark/light mode toggle
 
 ### Phase 2: Form & Input
+
 - [ ] Build solution input form
 - [ ] Add code editor (Monaco)
 - [ ] Implement category/subcategory selection
 - [ ] Add form validation with Zod
 
 ### Phase 3: LeetCode Integration
+
 - [ ] Research LeetCode API/scraping approach
 - [ ] Implement problem data fetching
 - [ ] Parse and format problem details
 - [ ] Handle edge cases and errors
 
 ### Phase 4: AI Integration
+
 - [ ] Setup AI API (OpenAI/Gemini)
 - [ ] Create prompt engineering for approach generation
 - [ ] Implement complexity analysis generation
 - [ ] Add manual override option
 
 ### Phase 5: GitHub Integration
+
 - [ ] Implement GitHub OAuth or PAT authentication
 - [ ] Create file generation logic
 - [ ] Implement commit and push functionality
 - [ ] Add conflict detection and handling
 
 ### Phase 6: Preview & Finalization
+
 - [ ] Build markdown preview renderer
 - [ ] Implement edit before submit
 - [ ] Add validation and error handling
 - [ ] Create success/failure notifications
 
 ### Phase 7: Polish & Deploy
+
 - [ ] Add loading states and animations
 - [ ] Implement auto-save and history
 - [ ] Write documentation
@@ -426,6 +457,7 @@ async function validateToken(token: string) {
 ## 🔍 Technical Considerations
 
 ### LeetCode Data Fetching Challenges
+
 - LeetCode doesn't have an official public API
 - Options:
   1. **GraphQL API** (undocumented but works): `https://leetcode.com/graphql`
@@ -434,18 +466,21 @@ async function validateToken(token: string) {
 - Handle rate limiting and errors gracefully
 
 ### GitHub API Considerations
+
 - File content must be base64 encoded
 - Need SHA hash for updating existing files
 - Handle large files (>1MB) using Git Data API
 - Respect rate limits (5000 requests/hour for authenticated users)
 
 ### AI API Cost Optimization
+
 - Use cheaper models for approach generation (GPT-3.5-turbo)
 - Cache common patterns and explanations
 - Implement token usage limits
 - Consider free alternatives (Hugging Face, local models)
 
 ### Security Best Practices
+
 - Never expose API keys in client-side code
 - Use environment variables for sensitive data
 - Implement API routes in Next.js for server-side operations
@@ -484,6 +519,7 @@ async function validateToken(token: string) {
 ## 🎯 Success Criteria
 
 The tool is successful when:
+
 - ✅ User can submit a LeetCode solution in under 2 minutes
 - ✅ AI generates accurate approach explanations 90%+ of the time
 - ✅ GitHub integration works without manual git commands
@@ -509,6 +545,7 @@ The tool is successful when:
 ## 📄 Sample Prompts for AI Generation
 
 ### Approach Generation Prompt:
+
 ```
 Analyze this LeetCode solution and generate a clear, beginner-friendly explanation:
 
@@ -529,6 +566,7 @@ Write in a conversational, teaching style. Use simple language.
 ```
 
 ### Complexity Analysis Prompt:
+
 ```
 Analyze the time and space complexity of this solution:
 
@@ -559,17 +597,20 @@ Explain briefly why for each one.
 To build this tool:
 
 1. **Setup Project**:
+
    ```bash
    npx create-next-app@latest leetcode-automation --typescript --tailwind --app
    cd leetcode-automation
    ```
 
 2. **Install Dependencies**:
+
    ```bash
    npm install @octokit/rest openai react-hook-form zod @monaco-editor/react
    ```
 
 3. **Create Environment Variables** (`.env.local`):
+
    ```
    OPENAI_API_KEY=your_key_here
    GITHUB_CLIENT_ID=your_client_id

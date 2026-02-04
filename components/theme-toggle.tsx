@@ -16,22 +16,21 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <div className="w-9 h-9 rounded-lg border border-zinc-200 dark:border-zinc-800" />
+      <div className="h-9 w-9 rounded-lg border border-zinc-200 dark:border-zinc-800" />
     );
   }
 
   return (
     <button
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="w-9 h-9 rounded-lg border border-zinc-200 dark:border-zinc-800 flex items-center justify-center hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+      className="flex h-9 w-9 items-center justify-center rounded-lg border border-zinc-200 transition-colors hover:bg-zinc-100 dark:border-zinc-800 dark:hover:bg-zinc-900"
       aria-label="Toggle theme"
     >
       {theme === "dark" ? (
-        <Sun className="w-4 h-4 text-zinc-400" />
+        <Sun className="h-4 w-4 text-zinc-400" />
       ) : (
-        <Moon className="w-4 h-4 text-black" />
+        <Moon className="h-4 w-4 text-black" />
       )}
     </button>
   );
 }
-

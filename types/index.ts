@@ -1,37 +1,49 @@
 // Core type definitions for LeetCode Documentation Automation Tool
 
-export type Language = 'typescript' | 'javascript' | 'python' | 'java' | 'cpp' | 'go';
+export type Language =
+  | "typescript"
+  | "javascript"
+  | "python"
+  | "java"
+  | "cpp"
+  | "go";
 
-export type Difficulty = 'Easy' | 'Medium' | 'Hard';
+export type Difficulty = "Easy" | "Medium" | "Hard";
 
-export type DataStructureCategory = 
-  | 'arrays'
-  | 'hashmap'
-  | 'stack'
-  | 'queue'
-  | 'linked-list'
-  | 'tree'
-  | 'graph'
-  | 'dp'
-  | 'backtracking'
-  | 'binary-search-tree'
-  | 'heap'
-  | 'trie'
-  | 'string'
-  | 'math'
-  | 'bit-manipulation'
-  | 'greedy'
-  | 'divide-and-conquer';
+export type DataStructureCategory =
+  | "arrays"
+  | "hashmap"
+  | "stack"
+  | "queue"
+  | "linked-list"
+  | "tree"
+  | "graph"
+  | "dp"
+  | "backtracking"
+  | "binary-search-tree"
+  | "heap"
+  | "trie"
+  | "string"
+  | "math"
+  | "bit-manipulation"
+  | "greedy"
+  | "divide-and-conquer";
 
 export type SubCategory = {
-  arrays: 'binary-search' | 'sliding-window' | 'two-pointers' | 'prefix-sum' | 'kadane' | 'other';
-  hashmap: 'counting' | 'grouping' | 'frequency' | 'other';
-  stack: 'monotonic' | 'parentheses' | 'other';
-  queue: 'bfs' | 'deque' | 'priority-queue' | 'other';
-  tree: 'traversal' | 'bst' | 'construction' | 'other';
-  graph: 'bfs' | 'dfs' | 'shortest-path' | 'topological-sort' | 'other';
-  dp: 'linear' | '2d' | 'knapsack' | 'subsequence' | 'other';
-  string: 'pattern-matching' | 'palindrome' | 'substring' | 'other';
+  arrays:
+    | "binary-search"
+    | "sliding-window"
+    | "two-pointers"
+    | "prefix-sum"
+    | "kadane"
+    | "other";
+  hashmap: "counting" | "grouping" | "frequency" | "other";
+  stack: "monotonic" | "parentheses" | "other";
+  queue: "bfs" | "deque" | "priority-queue" | "other";
+  tree: "traversal" | "bst" | "construction" | "other";
+  graph: "bfs" | "dfs" | "shortest-path" | "topological-sort" | "other";
+  dp: "linear" | "2d" | "knapsack" | "subsequence" | "other";
+  string: "pattern-matching" | "palindrome" | "substring" | "other";
   // Add more as needed
   [key: string]: string;
 };

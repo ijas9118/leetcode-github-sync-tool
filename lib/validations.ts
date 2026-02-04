@@ -5,51 +5,74 @@ export const solutionFormSchema = z.object({
     .string()
     .min(1, "Problem number is required")
     .regex(/^\d+$/, "Must be a valid number"),
-  
-  language: z.enum(["typescript", "javascript", "python", "java", "cpp", "go"]),
-  
+
+  language: z
+    .string()
+    .min(1, "Please select a language")
+    .refine(
+      (val) =>
+        ["typescript", "javascript", "python", "java", "cpp", "go"].includes(
+          val
+        ),
+      "Please select a valid language"
+    ),
+
   solutionCode: z
     .string()
     .min(10, "Solution code must be at least 10 characters"),
-  
-  category: z.enum([
-    "arrays",
-    "hashmap",
-    "stack",
-    "queue",
-    "linked-list",
-    "tree",
-    "graph",
-    "dp",
-    "backtracking",
-    "binary-search-tree",
-    "heap",
-    "trie",
-    "string",
-    "math",
-    "bit-manipulation",
-    "greedy",
-    "divide-and-conquer",
-  ]),
-  
+
+  category: z
+    .string()
+    .min(1, "Please select a category")
+    .refine(
+      (val) =>
+        [
+          "arrays",
+          "hashmap",
+          "stack",
+          "queue",
+          "linked-list",
+          "tree",
+          "graph",
+          "dp",
+          "backtracking",
+          "binary-search-tree",
+          "heap",
+          "trie",
+          "string",
+          "math",
+          "bit-manipulation",
+          "greedy",
+          "divide-and-conquer",
+        ].includes(val),
+      "Please select a valid category"
+    ),
+
   subcategory: z.string().min(1, "Subcategory is required"),
-  
+
   difficulty: z.enum(["Easy", "Medium", "Hard"]),
-  
+
   useAI: z.boolean().default(true),
-  
+
   manualApproach: z.string().optional(),
-  
-  timeComplexity: z.string().optional(),
-  
-  spaceComplexity: z.string().optional(),
+
+  timeComplexity: z.string().min(1, "Time complexity is required"),
+
+  spaceComplexity: z.string().min(1, "Space complexity is required"),
 });
 
 export type SolutionFormValues = z.infer<typeof solutionFormSchema>;
 
 // Subcategory options based on category
 export const subcategoryOptions: Record<string, string[]> = {
-  arrays: ["binary-search", "sliding-window", "two-pointers", "prefix-sum", "kadane", "other"],
+  arrays: [
+    "binary-search",
+    "sliding-window",
+    "two-pointers",
+    "prefix-sum",
+    "kadane",
+    "other",
+  ],
   hashmap: ["counting", "grouping", "frequency", "other"],
   stack: ["monotonic", "parentheses", "other"],
   queue: ["bfs", "deque", "priority-queue", "other"],

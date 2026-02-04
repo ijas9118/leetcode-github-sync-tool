@@ -1,8 +1,10 @@
+import "./globals.css";
+
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { ThemeProvider } from "@/components/theme-provider";
+
 import { Header } from "@/components/header";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +18,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "LeetCode Documentation Automation Tool",
-  description: "Automate your LeetCode solution documentation and GitHub integration",
+  description:
+    "Automate your LeetCode solution documentation and GitHub integration",
 };
 
 export default function RootLayout({
