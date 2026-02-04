@@ -23,7 +23,7 @@
 
 ### 1.1 Folder Structure Reorganization
 
-- [X] Create new folder structure:
+- [x] Create new folder structure:
 
   ```
   ├── app/
@@ -45,14 +45,14 @@
   └── constants/           # App constants
   ```
 
-- [X] Move existing files to new structure:
-  - [X] Move `github-utils.ts` → split into `lib/github/` modules
-  - [X] Move `leetcode-parser.ts` → `lib/leetcode/parser.ts`
-  - [X] Move `validations.ts` → `lib/validations/schemas.ts`
-  - [X] Move form components → `components/forms/`
-  - [X] Move preview components → `components/preview/`
+- [x] Move existing files to new structure:
+  - [x] Move `github-utils.ts` → split into `lib/github/` modules
+  - [x] Move `leetcode-parser.ts` → `lib/leetcode/parser.ts`
+  - [x] Move `validations.ts` → `lib/validations/schemas.ts`
+  - [x] Move form components → `components/forms/`
+  - [x] Move preview components → `components/preview/`
 
-- [X] Update all import paths after restructuring
+- [x] Update all import paths after restructuring
 
 ### 1.2 Create Type Definitions
 

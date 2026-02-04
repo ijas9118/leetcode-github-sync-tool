@@ -20,6 +20,7 @@ interface LeetCodeProblem {
     explanation?: string;
   }>;
   constraints?: string;
+  hints?: string[];
   isManual?: boolean;
 }
 
@@ -85,6 +86,7 @@ export function ProblemPreview({
   const statement = isManual
     ? problem.content
     : extractProblemStatement(problem.content);
+
 
   const difficultyColor =
     {
@@ -220,6 +222,32 @@ export function ProblemPreview({
               <pre className="font-mono text-sm whitespace-pre-wrap text-zinc-700 dark:text-zinc-300">
                 {constraints}
               </pre>
+            </div>
+          </div>
+        )}
+
+        {/* Hints */}
+        {problem.hints && problem.hints.length > 0 && (
+          <div>
+            <h4 className="mb-2 text-sm font-semibold text-black dark:text-white">
+              💡 Hints
+            </h4>
+            <div className="space-y-2">
+              {problem.hints.map((hint, index) => (
+                <div
+                  key={index}
+                  className="rounded-lg border border-zinc-200 bg-zinc-50 p-3 dark:border-zinc-800 dark:bg-zinc-900"
+                >
+                  <div className="flex gap-2">
+                    <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
+                      {index + 1}.
+                    </span>
+                    <p className="text-sm text-zinc-700 dark:text-zinc-300">
+                      {hint}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}

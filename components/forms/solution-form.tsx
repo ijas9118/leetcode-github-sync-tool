@@ -40,6 +40,7 @@ interface LeetCodeProblem {
     explanation?: string;
   }>;
   constraints?: string;
+  hints?: string[];
   isManual?: boolean;
 }
 
