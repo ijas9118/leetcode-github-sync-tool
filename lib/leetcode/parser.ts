@@ -1,5 +1,40 @@
-// Helper functions for parsing LeetCode problem content
+/**
+ * Helper functions for parsing LeetCode problem content
+ */
 
+/**
+ * Remove HTML tags from string
+ */
+export function stripHtml(html: string): string {
+  // Remove HTML tags
+  let text = html.replace(/<[^>]+>/g, " ");
+
+  // Decode common HTML entities
+  text = text
+    .replace(/&nbsp;/g, " ")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/g, "'")
+    .replace(/&ldquo;/g, '"')
+    .replace(/&rdquo;/g, '"')
+    .replace(/&lsquo;/g, "'")
+    .replace(/&rsquo;/g, "'")
+    .replace(/<sup>/g, "^")
+    .replace(/<\/sup>/g, "");
+
+  // Clean up whitespace
+  text = text.replace(/\s+/g, " ");
+  text = text.replace(/\n\s+/g, "\n");
+
+  return text.trim();
+}
+
+/**
+ * Parse examples from problem content
+ */
 export function parseExamples(content: string): Array<{
   input: string;
   output: string;
@@ -80,6 +115,9 @@ export function parseExamples(content: string): Array<{
   return examples;
 }
 
+/**
+ * Parse constraints from problem content
+ */
 export function parseConstraints(content: string): string {
   // Match constraints section - can be <p><strong>Constraints:</strong></p> followed by <ul>
   const constraintsMatch = content.match(
@@ -125,6 +163,9 @@ export function parseConstraints(content: string): string {
   return stripHtml(constraintsHtml).trim();
 }
 
+/**
+ * Extract problem statement (remove examples and constraints)
+ */
 export function extractProblemStatement(content: string): string {
   // Remove example and constraints sections to get just the problem statement
   let statement = content;
@@ -158,33 +199,9 @@ export function extractProblemStatement(content: string): string {
   return statement;
 }
 
-export function stripHtml(html: string): string {
-  // Remove HTML tags
-  let text = html.replace(/<[^>]+>/g, " ");
-
-  // Decode common HTML entities
-  text = text
-    .replace(/&nbsp;/g, " ")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&#x27;/g, "'")
-    .replace(/&ldquo;/g, '"')
-    .replace(/&rdquo;/g, '"')
-    .replace(/&lsquo;/g, "'")
-    .replace(/&rsquo;/g, "'")
-    .replace(/<sup>/g, "^")
-    .replace(/<\/sup>/g, "");
-
-  // Clean up whitespace
-  text = text.replace(/\s+/g, " ");
-  text = text.replace(/\n\s+/g, "\n");
-
-  return text.trim();
-}
-
+/**
+ * Format difficulty string
+ */
 export function formatDifficulty(
   difficulty: string
 ): "Easy" | "Medium" | "Hard" {

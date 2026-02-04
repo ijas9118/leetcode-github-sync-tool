@@ -125,38 +125,38 @@
 
 ### 2.1 GitHub Utilities Refactoring
 
-- [ ] Split `lib/github-utils.ts` into modules:
-  - [ ] Create `lib/github/auth.ts`:
-    - [ ] Move `validateGitHubToken()`
-  - [ ] Create `lib/github/file-generator.ts`:
-    - [ ] Move `generateFilePath()`
-    - [ ] Move `getFileExtension()`
-    - [ ] Move `generateReadmeContent()`
-    - [ ] Move `generatePreviewReadme()`
-  - [ ] Create `lib/github/api.ts`:
-    - [ ] Move `pushToGitHub()`
-    - [ ] Add structured error logging
+- [x] Split `lib/github-utils.ts` into modules:
+  - [x] Create `lib/github/auth.ts`:
+    - [x] Move `validateGitHubToken()`
+  - [x] Create `lib/github/file-generator.ts`:
+    - [x] Move `generateFilePath()`
+    - [x] Move `getFileExtension()`
+    - [x] Move `generateReadmeContent()`
+    - [x] Move `generatePreviewReadme()`
+  - [x] Create `lib/github/api.ts`:
+    - [x] Move `pushToGitHub()`
+    - [x] Add structured error logging
 
-- [ ] Improve type safety in GitHub modules:
-  - [ ] Add explicit return types
-  - [ ] Remove `as` type assertions
-  - [ ] Create type guards where needed
+- [x] Improve type safety in GitHub modules:
+  - [x] Add explicit return types
+  - [x] Remove `as` type assertions
+  - [x] Create type guards where needed
 
-- [ ] Create `lib/github/index.ts` barrel export
+- [x] Create `lib/github/index.ts` barrel export
 
 ### 2.2 LeetCode Utilities Refactoring
 
-- [ ] Refactor `lib/leetcode/parser.ts`:
-  - [ ] Create reusable `extractSection()` helper
-  - [ ] Reduce regex duplication
-  - [ ] Add JSDoc comments
+- [x] Refactor `lib/leetcode/parser.ts`:
+  - [x] Create reusable `extractSection()` helper
+  - [x] Reduce regex duplication
+  - [x] Add JSDoc comments
 
-- [ ] Create `lib/leetcode/api.ts`:
-  - [ ] Move API logic from route
-  - [ ] Add retry with timeout
-  - [ ] Add rate limiting logic
+- [x] Create `lib/leetcode/api.ts`:
+  - [x] Move API logic from route
+  - [x] Add retry with timeout
+  - [x] Add rate limiting logic
 
-- [ ] Create `lib/leetcode/index.ts` barrel export
+- [x] Create `lib/leetcode/index.ts` barrel export
 
 ### 2.3 Validation Schema Improvements
 
