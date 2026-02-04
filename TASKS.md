@@ -91,29 +91,29 @@
 
 ### 1.4 Create API Response Utilities
 
-- [ ] Create `lib/api/response.ts`:
-  - [ ] Define `ApiError` class
-  - [ ] Create `errorResponse()` function
-  - [ ] Create `successResponse()` function
-  - [ ] Define response interfaces
+- [x] Create `lib/api/response.ts`:
+  - [x] Define `ApiError` class
+  - [x] Create `errorResponse()` function
+  - [x] Create `successResponse()` function
+  - [x] Define response interfaces
 
-- [ ] Create `lib/api/errors.ts`:
-  - [ ] Define error codes enum
-  - [ ] Create custom error classes
+- [x] Create `lib/api/errors.ts`:
+  - [x] Define error codes enum
+  - [x] Create custom error classes
 
 ### 1.5 Constants & Configuration
 
-- [ ] Create `constants/config.ts`:
-  - [ ] LeetCode API constants
-  - [ ] GitHub API constants
-  - [ ] Retry configuration
-  - [ ] Timeout values
+- [x] Create `constants/config.ts`:
+  - [x] LeetCode API constants
+  - [x] GitHub API constants
+  - [x] Retry configuration
+  - [x] Timeout values
 
-- [ ] Create `constants/options.ts`:
-  - [ ] Move category options
-  - [ ] Move subcategory options
-  - [ ] Move language options
-  - [ ] Add difficulty options
+- [x] Create `constants/options.ts`:
+  - [x] Move category options
+  - [x] Move subcategory options
+  - [x] Move language options
+  - [x] Add difficulty options
 
 ---
 
