@@ -331,7 +331,7 @@ Format your response in Markdown with clear sections.`;
             problemUrl: problemData.problemUrl,
           },
           solutionData: {
-            code: values.solutionCode,
+            solutionCode: values.solutionCode,
             language: values.language,
             category: values.category,
             subcategory: values.subcategory,

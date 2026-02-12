@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     // Validate solution data
     if (
-      !solutionData.code ||
+      !solutionData.solutionCode ||
       !solutionData.language ||
       !solutionData.category ||
       !solutionData.subcategory
@@ -40,6 +40,11 @@ export async function POST(request: NextRequest) {
         400,
         ErrorCode.VALIDATION_ERROR
       );
+    }
+
+    // Ensure topics are populated
+    if (!solutionData.topics && problemData.topicTags) {
+      solutionData.topics = problemData.topicTags;
     }
 
     // Push to GitHub
