@@ -166,21 +166,16 @@ export function SolutionForm() {
 
   // Generate AI prompt template for manual copy-paste
   const generateAIPrompt = () => {
+    const problemId = problemData?.questionFrontendId || problemNumber || "[ID]";
     const problemTitle = problemData?.title || "[Problem Title]";
-    const problemDescription = problemData?.content || "[Problem Description]";
     const code = solutionCode || "[Your Solution Code]";
     const lang = language || "typescript";
 
-    return `Analyze this LeetCode solution and generate a detailed explanation in Markdown format.
-
-**Problem:** ${problemTitle}
-
-**Problem Description:**
-${problemDescription.substring(0, 300)}${problemDescription.length > 300 ? "..." : ""}
+    return `Analyze this LeetCode solution for problem "${problemId}. ${problemTitle}" and generate a detailed explanation in Markdown format.
 
 **My Solution Code (${lang}):**
 \`\`\`${lang}
-${code.substring(0, 500)}${code.length > 500 ? "\n... (truncated)" : ""}
+${code}
 \`\`\`
 
 **Requirements:**
