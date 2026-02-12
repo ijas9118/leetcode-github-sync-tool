@@ -42,7 +42,7 @@ export const subcategoryOptions: Record<string, string[]> = {
   hashmap: ["counting", "grouping", "frequency", "other"],
   stack: ["monotonic", "parentheses", "other"],
   queue: ["bfs", "deque", "priority-queue", "other"],
-  "linked-list": ["reversal", "two-pointers", "fast-slow", "other"],
+  "linked-list": ["reversal", "two-pointers", "deletion", "fast-slow", "other"],
   tree: ["traversal", "bst", "construction", "other"],
   graph: ["bfs", "dfs", "shortest-path", "topological-sort", "other"],
   dp: ["linear", "2d", "knapsack", "subsequence", "other"],
