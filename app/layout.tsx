@@ -37,7 +37,7 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem={false}
         >
-          <Header />
+          <Header githubProfile={process.env.GITHUB_OWNER} />
           {children}
         </ThemeProvider>
       </body>

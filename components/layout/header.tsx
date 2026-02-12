@@ -1,10 +1,12 @@
 "use client";
 
 import { Code2, Github } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+
 
 import { ThemeToggle } from "../theme-toggle";
 
-export function Header() {
+export function Header({ githubProfile }: { githubProfile?: string }) {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-black">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
@@ -23,12 +25,21 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 rounded-lg border border-zinc-200 px-3 py-1.5 dark:border-zinc-800">
-            <Github className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />
-            <span className="text-sm text-zinc-600 dark:text-zinc-400">
-              Not Connected
-            </span>
-          </div>
+          {githubProfile ? (
+            <Badge variant="outline" className="gap-1.5 py-1.5">
+              <Github className="h-3.5 w-3.5" />
+              <span>{githubProfile}</span>
+              <span className="ml-1.5 flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+            </Badge>
+          ) : (
+            <Badge variant="secondary" className="gap-1.5 py-1.5 text-zinc-500">
+              <Github className="h-3.5 w-3.5" />
+              <span>Not Connected</span>
+            </Badge>
+          )}
           <ThemeToggle />
         </div>
       </div>
