@@ -171,7 +171,7 @@ export function SolutionForm() {
     const code = solutionCode || "[Your Solution Code]";
     const lang = language || "typescript";
 
-    return `Analyze this LeetCode solution and generate a concise explanation in Markdown format.
+    return `Analyze this LeetCode solution and generate a detailed explanation in Markdown format.
 
 **Problem:** ${problemTitle}
 
@@ -183,10 +183,14 @@ ${problemDescription.substring(0, 300)}${problemDescription.length > 300 ? "..."
 ${code.substring(0, 500)}${code.length > 500 ? "\n... (truncated)" : ""}
 \`\`\`
 
-**Please provide:**
-1. **Approach**: Brief explanation of the solution strategy (2-3 sentences)
-2. **Time Complexity**: Big-O notation with explanation
-3. **Space Complexity**: Big-O notation with explanation
+**Requirements:**
+- Explain the approach/idea of the solution in small, easy-to-understand paragraphs
+- Use simple, beginner-friendly language
+- Provide detailed explanations of how the algorithm works. But don't make the md file too large.
+- Break down the logic step-by-step
+- Include the intuition behind the approach
+- Avoid being concise - prioritize clarity and completeness over brevity
+- Use examples or analogies where helpful.
 
 Format your response in Markdown with clear sections.`;
   };
